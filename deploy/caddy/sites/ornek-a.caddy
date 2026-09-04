@@ -1,0 +1,9 @@
+http://ornek-a.localhost {
+	handle /api/* {
+		reverse_proxy ornek-a-api:3001
+	}
+
+	handle {
+		reverse_proxy ornek-a-web:3000
+	}
+}
