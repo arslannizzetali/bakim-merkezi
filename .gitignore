@@ -14,3 +14,9 @@ apps/api/.env.*
 *.log
 
 .claude/settings.local.json
+
+# Build caches and IDE files
+*.tsbuildinfo
+.vscode/
+.idea/
+Thumbs.db
