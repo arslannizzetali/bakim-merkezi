@@ -40,6 +40,15 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM_EMAIL: z.string().default("onboarding@resend.dev"),
   NOTIFY_EMAIL: z.string().email().optional()
+}).superRefine((value, ctx) => {
+  if (value.NODE_ENV !== "production") {
+    return;
+  }
+  for (const key of ["MINIO_ACCESS_KEY", "MINIO_SECRET_KEY"] as const) {
+    if (value[key] === "minioadmin") {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [key], message: "default MinIO credentials are not allowed in production" });
+    }
+  }
 });
 
 const parsed = envSchema.safeParse(process.env);
