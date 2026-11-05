@@ -3,6 +3,10 @@ import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { prisma } from "../../apps/api/src/config/database.js";
 
+// Must match the values used when seeding the test database.
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "";
+const EMPLOYEE_PASSWORD = process.env.SEED_EMPLOYEE_PASSWORD ?? "";
+
 const runIntegration = process.env.RUN_INTEGRATION === "true";
 const describeIntegration = runIntegration ? describe : describe.skip;
 
@@ -12,7 +16,7 @@ describeIntegration("security integration", () => {
     try {
       const login = await jsonRequest<{ accessToken: string }>(server.url, "/api/v1/auth/login", {
         method: "POST",
-        body: { email: "admin@bakimevi.com", password: "ChangeMe-Admin-1!" }
+        body: { email: "admin@bakimevi.com", password: ADMIN_PASSWORD }
       });
 
       const me = await fetch(`${server.url}/api/v1/auth/me`, {
@@ -29,7 +33,7 @@ describeIntegration("security integration", () => {
     try {
       const login = await jsonRequest<{ accessToken: string }>(server.url, "/api/v1/auth/login", {
         method: "POST",
-        body: { email: "ahmet@bakimevi.com", password: "ChangeMe-Employee-1!" }
+        body: { email: "ahmet@bakimevi.com", password: EMPLOYEE_PASSWORD }
       });
 
       const response = await fetch(`${server.url}/api/v1/admin/dashboard-stats`, {
@@ -44,7 +48,7 @@ describeIntegration("security integration", () => {
   it("RED evrak silinemez", async () => {
     const server = await startServer();
     try {
-      const login = await loginAs(server.url, "admin@bakimevi.com", "ChangeMe-Admin-1!");
+      const login = await loginAs(server.url, "admin@bakimevi.com", ADMIN_PASSWORD);
       const redDocument = await prisma.document.findFirstOrThrow({
         where: { priority: "RED", isDeleted: false },
         select: { id: true }
@@ -65,7 +69,7 @@ describeIntegration("security integration", () => {
       const response = await fetch(`${server.url}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "admin@bakimevi.com", password: "ChangeMe-Admin-1!" })
+        body: JSON.stringify({ email: "admin@bakimevi.com", password: ADMIN_PASSWORD })
       });
       expect(response.status).toBe(200);
       const cookie = response.headers.get("set-cookie");
@@ -90,7 +94,7 @@ describeIntegration("security integration", () => {
   it("Çalışan başka çalışanın evrakını indiremez", async () => {
     const server = await startServer();
     try {
-      const login = await loginAs(server.url, "ahmet@bakimevi.com", "ChangeMe-Employee-1!");
+      const login = await loginAs(server.url, "ahmet@bakimevi.com", EMPLOYEE_PASSWORD);
       const ahmet = await prisma.user.findUniqueOrThrow({
         where: { email: "ahmet@bakimevi.com" },
         select: { id: true }
@@ -112,7 +116,7 @@ describeIntegration("security integration", () => {
   it("Hasta güncelleme: çalışan sadece kendi girdiklerini görür", async () => {
     const server = await startServer();
     try {
-      const login = await loginAs(server.url, "ahmet@bakimevi.com", "ChangeMe-Employee-1!");
+      const login = await loginAs(server.url, "ahmet@bakimevi.com", EMPLOYEE_PASSWORD);
       const ahmet = await prisma.user.findUniqueOrThrow({
         where: { email: "ahmet@bakimevi.com" },
         select: { id: true }
@@ -136,7 +140,7 @@ describeIntegration("security integration", () => {
   it("Hasta detayı: çalışan başka çalışanların güncelleme ve evrak özetlerini görmez", async () => {
     const server = await startServer();
     try {
-      const login = await loginAs(server.url, "ahmet@bakimevi.com", "ChangeMe-Employee-1!");
+      const login = await loginAs(server.url, "ahmet@bakimevi.com", EMPLOYEE_PASSWORD);
       const ahmet = await prisma.user.findUniqueOrThrow({
         where: { email: "ahmet@bakimevi.com" },
         select: { id: true }
@@ -168,7 +172,7 @@ describeIntegration("security integration", () => {
   it("Hasta listesi: çalışan başka çalışanların güncelleme ve evrak sayaçlarını görmez", async () => {
     const server = await startServer();
     try {
-      const login = await loginAs(server.url, "ahmet@bakimevi.com", "ChangeMe-Employee-1!");
+      const login = await loginAs(server.url, "ahmet@bakimevi.com", EMPLOYEE_PASSWORD);
       const ahmet = await prisma.user.findUniqueOrThrow({
         where: { email: "ahmet@bakimevi.com" },
         select: { id: true }

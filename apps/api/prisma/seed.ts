@@ -4,12 +4,18 @@ import type { CareType, DocumentPriority, MobilityLevel, PatientStatus, Prisma, 
 import { prisma } from "../src/config/database.js";
 import { encryptionService } from "../src/services/encryption.service.js";
 import { storageService } from "../src/services/storage.service.js";
+import { assertSeedAllowed, resolveSeedPassword } from "./seed-credentials.js";
+
+assertSeedAllowed();
+
+const adminPassword = resolveSeedPassword("SEED_ADMIN_PASSWORD");
+const employeePassword = resolveSeedPassword("SEED_EMPLOYEE_PASSWORD");
 
 const users = [
-  { email: "admin@bakimevi.com", password: "ChangeMe-Admin-1!", role: "ADMIN", firstName: "Admin", lastName: "Yönetici" },
-  { email: "ahmet@bakimevi.com", password: "ChangeMe-Employee-1!", role: "EMPLOYEE", firstName: "Ahmet", lastName: "Demir" },
-  { email: "mehmet@bakimevi.com", password: "ChangeMe-Employee-1!", role: "EMPLOYEE", firstName: "Mehmet", lastName: "Kaya" },
-  { email: "fatma@bakimevi.com", password: "ChangeMe-Employee-1!", role: "EMPLOYEE", firstName: "Fatma", lastName: "Şahin" }
+  { email: "admin@bakimevi.com", password: adminPassword.password, role: "ADMIN", firstName: "Admin", lastName: "Yönetici" },
+  { email: "ahmet@bakimevi.com", password: employeePassword.password, role: "EMPLOYEE", firstName: "Ahmet", lastName: "Demir" },
+  { email: "mehmet@bakimevi.com", password: employeePassword.password, role: "EMPLOYEE", firstName: "Mehmet", lastName: "Kaya" },
+  { email: "fatma@bakimevi.com", password: employeePassword.password, role: "EMPLOYEE", firstName: "Fatma", lastName: "Şahin" }
 ] satisfies Array<{ email: string; password: string; role: Role; firstName: string; lastName: string }>;
 
 const patientSeed = [
@@ -43,6 +49,16 @@ async function main(): Promise<void> {
         }
       })
     );
+  }
+
+  for (const [label, resolved] of [
+    ["admin", adminPassword],
+    ["employee", employeePassword]
+  ] as const) {
+    if (resolved.generated) {
+      // Printed once so the developer can log in; it is not stored anywhere else.
+      console.log(`Generated ${label} seed password (save it now): ${resolved.password}`);
+    }
   }
 
   const admin = createdUsers.find((user) => user.role === "ADMIN");
