@@ -41,32 +41,68 @@ export default function NewUserPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Input label="Ad" value={form.firstName} onChange={(value) => setForm({ ...form, firstName: value })} />
         <Input label="Soyad" value={form.lastName} onChange={(value) => setForm({ ...form, lastName: value })} />
-        <Input label="E-posta" type="email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} />
-        <Input label="Şifre" type="password" value={form.password} onChange={(value) => setForm({ ...form, password: value })} />
+        <Input
+          label="E-posta"
+          type="email"
+          value={form.email}
+          onChange={(value) => setForm({ ...form, email: value })}
+        />
+        <Input
+          label="Şifre"
+          type="password"
+          value={form.password}
+          onChange={(value) => setForm({ ...form, password: value })}
+        />
         <label className="block">
           <span className="mb-1 block text-sm font-semibold text-text">Rol</span>
-          <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} className="focus-ring w-full rounded-xl border border-border px-4 py-3">
+          <select
+            value={form.role}
+            onChange={(event) => setForm({ ...form, role: event.target.value })}
+            className="focus-ring w-full rounded-xl border border-border px-4 py-3"
+          >
             <option value="EMPLOYEE">Çalışan</option>
             <option value="ADMIN">Admin</option>
           </select>
         </label>
         <label className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
-          <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} />
+          <input
+            type="checkbox"
+            checked={form.isActive}
+            onChange={(event) => setForm({ ...form, isActive: event.target.checked })}
+          />
           Aktif
         </label>
       </div>
-      <button className="rounded-xl bg-primary px-6 py-3 font-semibold text-white disabled:opacity-60" disabled={mutation.isPending}>
+      <button
+        className="rounded-xl bg-primary px-6 py-3 font-semibold text-white disabled:opacity-60"
+        disabled={mutation.isPending}
+      >
         Kaydet
       </button>
     </form>
   );
 }
 
-function Input({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
+function Input({
+  label,
+  value,
+  onChange,
+  type = "text"
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
   return (
     <label className="block">
       <span className="mb-1 block text-sm font-semibold text-text">{label}</span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} type={type} className="focus-ring w-full rounded-xl border border-border px-4 py-3" />
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        type={type}
+        className="focus-ring w-full rounded-xl border border-border px-4 py-3"
+      />
     </label>
   );
 }

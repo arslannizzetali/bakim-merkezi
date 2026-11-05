@@ -79,7 +79,15 @@ export default function NewPatientPage() {
           onChange={(value) => setForm({ ...form, birthDate: value })}
           required
         />
-        <Select label="Cinsiyet" value={form.gender} onChange={(value) => setForm({ ...form, gender: value })} options={[["MALE", "Erkek"], ["FEMALE", "Kadın"]]} />
+        <Select
+          label="Cinsiyet"
+          value={form.gender}
+          onChange={(value) => setForm({ ...form, gender: value })}
+          options={[
+            ["MALE", "Erkek"],
+            ["FEMALE", "Kadın"]
+          ]}
+        />
         <Input
           label="TC Kimlik"
           value={form.tcNumber}
@@ -89,9 +97,32 @@ export default function NewPatientPage() {
           pattern="[0-9]{11}"
           title="TC kimlik 11 rakam olmalıdır"
         />
-        <Input label="Oda" value={form.roomNumber} onChange={(value) => setForm({ ...form, roomNumber: value })} maxLength={20} />
-        <Select label="Bakım türü" value={form.careType} onChange={(value) => setForm({ ...form, careType: value })} options={[["ELDERLY", "Yaşlı"], ["DISABLED", "Engelli"], ["BOTH", "Her İkisi"]]} />
-        <Select label="Hareketlilik" value={form.mobilityLevel} onChange={(value) => setForm({ ...form, mobilityLevel: value })} options={[["INDEPENDENT", "Bağımsız"], ["ASSISTED", "Yardımlı"], ["BEDRIDDEN", "Yatağa bağımlı"]]} />
+        <Input
+          label="Oda"
+          value={form.roomNumber}
+          onChange={(value) => setForm({ ...form, roomNumber: value })}
+          maxLength={20}
+        />
+        <Select
+          label="Bakım türü"
+          value={form.careType}
+          onChange={(value) => setForm({ ...form, careType: value })}
+          options={[
+            ["ELDERLY", "Yaşlı"],
+            ["DISABLED", "Engelli"],
+            ["BOTH", "Her İkisi"]
+          ]}
+        />
+        <Select
+          label="Hareketlilik"
+          value={form.mobilityLevel}
+          onChange={(value) => setForm({ ...form, mobilityLevel: value })}
+          options={[
+            ["INDEPENDENT", "Bağımsız"],
+            ["ASSISTED", "Yardımlı"],
+            ["BEDRIDDEN", "Yatağa bağımlı"]
+          ]}
+        />
         <Input
           label="Acil kişi"
           value={form.emergencyContactName}
@@ -110,14 +141,22 @@ export default function NewPatientPage() {
           title="Telefonu 05321234567, 5321234567 veya +905321234567 formatında girin"
         />
       </div>
-      <Input label="Alerjiler" value={form.allergies} onChange={(value) => setForm({ ...form, allergies: value })} maxLength={5000} />
+      <Input
+        label="Alerjiler"
+        value={form.allergies}
+        onChange={(value) => setForm({ ...form, allergies: value })}
+        maxLength={5000}
+      />
       <Input
         label="Süregelen ilaçlar"
         value={form.currentMedications}
         onChange={(value) => setForm({ ...form, currentMedications: value })}
         maxLength={5000}
       />
-      <button className="rounded-xl bg-primary px-6 py-3 font-semibold text-white disabled:opacity-60" disabled={mutation.isPending}>
+      <button
+        className="rounded-xl bg-primary px-6 py-3 font-semibold text-white disabled:opacity-60"
+        disabled={mutation.isPending}
+      >
         Kaydet
       </button>
     </form>
@@ -150,7 +189,7 @@ function formatPatientError(error: unknown): string {
     if (!firstDetail) {
       return error.message;
     }
-    const label = firstDetail.field ? fieldLabels[firstDetail.field] ?? firstDetail.field : "Alan";
+    const label = firstDetail.field ? (fieldLabels[firstDetail.field] ?? firstDetail.field) : "Alan";
     const message = firstDetail.message === "Invalid" ? "geçerli değil" : firstDetail.message;
     return `${label}: ${message}`;
   }
@@ -188,11 +227,25 @@ function Input({
   );
 }
 
-function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<[string, string]> }) {
+function Select({
+  label,
+  value,
+  onChange,
+  options
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<[string, string]>;
+}) {
   return (
     <label className="block">
       <span className="mb-1 block text-sm font-semibold text-text">{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="focus-ring w-full rounded-xl border border-border px-4 py-3">
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="focus-ring w-full rounded-xl border border-border px-4 py-3"
+      >
         {options.map(([optionValue, labelText]) => (
           <option key={optionValue} value={optionValue}>
             {labelText}

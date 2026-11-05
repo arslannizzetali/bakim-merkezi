@@ -20,13 +20,10 @@ export function DocumentList({ title, hint, documents, tone }: DocumentListProps
   const accessToken = useAuthStore((state) => state.accessToken);
 
   async function download(document: DocumentItem): Promise<void> {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? "/api/v1"}/documents/${document.id}/download`,
-      {
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        credentials: "include"
-      }
-    );
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "/api/v1"}/documents/${document.id}/download`, {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      credentials: "include"
+    });
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const link = window.document.createElement("a");
@@ -57,7 +54,9 @@ export function DocumentList({ title, hint, documents, tone }: DocumentListProps
   return (
     <section className={`rounded-2xl border p-5 ${toneClass(tone)}`}>
       <div className="mb-4">
-        <h3 className="text-lg font-bold">{title} ({documents.length} adet)</h3>
+        <h3 className="text-lg font-bold">
+          {title} ({documents.length} adet)
+        </h3>
         {hint ? <p className="mt-1 text-sm opacity-80">{hint}</p> : null}
       </div>
       <div className="space-y-3">
@@ -91,7 +90,9 @@ export function DocumentList({ title, hint, documents, tone }: DocumentListProps
                 {canAdmin() ? (
                   <select
                     value={document.priority}
-                    onChange={(event) => void changePriority(document, event.target.value as "RED" | "YELLOW" | "GREEN")}
+                    onChange={(event) =>
+                      void changePriority(document, event.target.value as "RED" | "YELLOW" | "GREEN")
+                    }
                     className="rounded-lg border border-border px-2 py-2 text-sm"
                   >
                     <option value="RED">Kırmızı</option>

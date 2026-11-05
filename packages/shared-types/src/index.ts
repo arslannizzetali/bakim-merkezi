@@ -2,13 +2,7 @@ export type Role = "ADMIN" | "EMPLOYEE";
 export type CareType = "ELDERLY" | "DISABLED" | "BOTH";
 export type PatientStatus = "ACTIVE" | "DISCHARGED" | "TRANSFERRED";
 export type MobilityLevel = "INDEPENDENT" | "ASSISTED" | "BEDRIDDEN";
-export type UpdateType =
-  | "MEDICATION"
-  | "CARE"
-  | "OBSERVATION"
-  | "STATUS_CHANGE"
-  | "VITAL_SIGNS"
-  | "INCIDENT";
+export type UpdateType = "MEDICATION" | "CARE" | "OBSERVATION" | "STATUS_CHANGE" | "VITAL_SIGNS" | "INCIDENT";
 export type PatientMood = "GOOD" | "MODERATE" | "BAD";
 export type DocumentPriority = "RED" | "YELLOW" | "GREEN";
 

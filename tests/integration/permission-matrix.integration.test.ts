@@ -132,7 +132,10 @@ describeIntegration("permission matrix", () => {
 
   describe("delete RED documents", () => {
     it("denied for every role", async () => {
-      const red = await prisma.document.findFirstOrThrow({ where: { priority: "RED", isDeleted: false }, select: { id: true } });
+      const red = await prisma.document.findFirstOrThrow({
+        where: { priority: "RED", isDeleted: false },
+        select: { id: true }
+      });
       expect((await call("DELETE", `/documents/${red.id}`, adminToken)).status).toBe(403);
       expect((await call("DELETE", `/documents/${red.id}`, employeeToken)).status).toBe(403);
       expect((await prisma.document.findUniqueOrThrow({ where: { id: red.id } })).isDeleted).toBe(false);

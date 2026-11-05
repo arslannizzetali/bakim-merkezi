@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
 
-export function SimpleTable({
-  headers,
-  rows
-}: {
-  headers: string[];
-  rows: ReactNode[][];
-}) {
+export function SimpleTable({ headers, rows }: { headers: string[]; rows: ReactNode[][] }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
       <table className="w-full border-collapse text-left text-sm">

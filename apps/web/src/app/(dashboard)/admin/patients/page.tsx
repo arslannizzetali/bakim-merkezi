@@ -52,7 +52,13 @@ export default function AdminPatientsPage() {
 function exportCsv(patients: NonNullable<ReturnType<typeof adminApi.patients> extends Promise<infer T> ? T : never>) {
   const rows = [
     ["Ad", "Soyad", "Oda", "Tür", "Durum"],
-    ...patients.map((patient) => [patient.firstName, patient.lastName, patient.roomNumber ?? "", patient.careType, patient.status])
+    ...patients.map((patient) => [
+      patient.firstName,
+      patient.lastName,
+      patient.roomNumber ?? "",
+      patient.careType,
+      patient.status
+    ])
   ];
   const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });

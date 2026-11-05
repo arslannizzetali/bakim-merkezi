@@ -47,15 +47,37 @@ export default function PatientsPage() {
           />
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
-          <Filter value={status} setValue={setStatus} options={[["", "Tümü"], ["ACTIVE", "Aktif"], ["DISCHARGED", "Taburcu"], ["TRANSFERRED", "Transfer"]]} />
-          <Filter value={careType} setValue={setCareType} options={[["", "Tümü"], ["ELDERLY", "Yaşlı"], ["DISABLED", "Engelli"], ["BOTH", "Her İkisi"]]} />
+          <Filter
+            value={status}
+            setValue={setStatus}
+            options={[
+              ["", "Tümü"],
+              ["ACTIVE", "Aktif"],
+              ["DISCHARGED", "Taburcu"],
+              ["TRANSFERRED", "Transfer"]
+            ]}
+          />
+          <Filter
+            value={careType}
+            setValue={setCareType}
+            options={[
+              ["", "Tümü"],
+              ["ELDERLY", "Yaşlı"],
+              ["DISABLED", "Engelli"],
+              ["BOTH", "Her İkisi"]
+            ]}
+          />
         </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {patientsQuery.data?.map((patient) => <PatientCard key={patient.id} patient={patient} />)}
+        {patientsQuery.data?.map((patient) => (
+          <PatientCard key={patient.id} patient={patient} />
+        ))}
       </section>
-      {!patientsQuery.data?.length ? <p className="rounded-2xl bg-surface p-6 text-center text-muted">Hasta bulunamadı.</p> : null}
+      {!patientsQuery.data?.length ? (
+        <p className="rounded-2xl bg-surface p-6 text-center text-muted">Hasta bulunamadı.</p>
+      ) : null}
     </div>
   );
 }

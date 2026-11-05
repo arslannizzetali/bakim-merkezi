@@ -17,7 +17,16 @@ const updateTypes = [
   { value: "INCIDENT", label: "Olay/Kaza", icon: AlertTriangle }
 ] as const;
 
-const careOptions = ["Banyo yardımı", "Beslenme yardımı", "Fizik tedavi", "Yara bakımı", "Psikolojik destek", "Egzersiz", "İlaç hatırlatma", "Kıyafet değişimi"];
+const careOptions = [
+  "Banyo yardımı",
+  "Beslenme yardımı",
+  "Fizik tedavi",
+  "Yara bakımı",
+  "Psikolojik destek",
+  "Egzersiz",
+  "İlaç hatırlatma",
+  "Kıyafet değişimi"
+];
 
 export function PatientUpdateForm({ patientId }: { patientId: string }) {
   const router = useRouter();
@@ -122,9 +131,24 @@ export function PatientUpdateForm({ patientId }: { patientId: string }) {
         <section className="rounded-2xl border border-border bg-surface p-5">
           <h3 className="mb-3 font-bold text-text">İlaç Girişi</h3>
           <div className="grid gap-3 md:grid-cols-3">
-            <input value={medicationName} onChange={(event) => setMedicationName(event.target.value)} className="focus-ring rounded-xl border border-border px-4 py-3" placeholder="İlaç adı" />
-            <input value={medicationDosage} onChange={(event) => setMedicationDosage(event.target.value)} className="focus-ring rounded-xl border border-border px-4 py-3" placeholder="Doz" />
-            <input value={medicationRoute} onChange={(event) => setMedicationRoute(event.target.value)} className="focus-ring rounded-xl border border-border px-4 py-3" placeholder="Yol: oral/IV" />
+            <input
+              value={medicationName}
+              onChange={(event) => setMedicationName(event.target.value)}
+              className="focus-ring rounded-xl border border-border px-4 py-3"
+              placeholder="İlaç adı"
+            />
+            <input
+              value={medicationDosage}
+              onChange={(event) => setMedicationDosage(event.target.value)}
+              className="focus-ring rounded-xl border border-border px-4 py-3"
+              placeholder="Doz"
+            />
+            <input
+              value={medicationRoute}
+              onChange={(event) => setMedicationRoute(event.target.value)}
+              className="focus-ring rounded-xl border border-border px-4 py-3"
+              placeholder="Yol: oral/IV"
+            />
           </div>
         </section>
       ) : null}
@@ -133,9 +157,27 @@ export function PatientUpdateForm({ patientId }: { patientId: string }) {
         <section className="rounded-2xl border border-border bg-surface p-5">
           <h3 className="mb-3 font-bold text-text">Vital Bulgular</h3>
           <div className="grid gap-3 md:grid-cols-3">
-            <input value={bloodPressure} onChange={(event) => setBloodPressure(event.target.value)} className="focus-ring rounded-xl border border-border px-4 py-3" placeholder="Tansiyon 120/80" />
-            <input value={heartRate} onChange={(event) => setHeartRate(event.target.value)} className="focus-ring rounded-xl border border-border px-4 py-3" placeholder="Nabız" type="number" />
-            <input value={temperature} onChange={(event) => setTemperature(event.target.value)} className="focus-ring rounded-xl border border-border px-4 py-3" placeholder="Ateş" type="number" step="0.1" />
+            <input
+              value={bloodPressure}
+              onChange={(event) => setBloodPressure(event.target.value)}
+              className="focus-ring rounded-xl border border-border px-4 py-3"
+              placeholder="Tansiyon 120/80"
+            />
+            <input
+              value={heartRate}
+              onChange={(event) => setHeartRate(event.target.value)}
+              className="focus-ring rounded-xl border border-border px-4 py-3"
+              placeholder="Nabız"
+              type="number"
+            />
+            <input
+              value={temperature}
+              onChange={(event) => setTemperature(event.target.value)}
+              className="focus-ring rounded-xl border border-border px-4 py-3"
+              placeholder="Ateş"
+              type="number"
+              step="0.1"
+            />
           </div>
         </section>
       ) : null}
@@ -152,7 +194,10 @@ export function PatientUpdateForm({ patientId }: { patientId: string }) {
               key={value}
               type="button"
               onClick={() => setPatientMood(value as "GOOD" | "MODERATE" | "BAD")}
-              className={cn("rounded-2xl border p-4 font-bold", patientMood === value ? classes : "border-border bg-white text-muted")}
+              className={cn(
+                "rounded-2xl border p-4 font-bold",
+                patientMood === value ? classes : "border-border bg-white text-muted"
+              )}
             >
               {label}
             </button>
@@ -162,7 +207,12 @@ export function PatientUpdateForm({ patientId }: { patientId: string }) {
 
       <label className="flex items-center justify-between rounded-2xl border border-red-300 bg-red-50 p-5 text-red-800">
         <span className="font-bold">Bu güncelleme acil durum bildirimi</span>
-        <input type="checkbox" checked={isUrgent} onChange={(event) => setIsUrgent(event.target.checked)} className="h-5 w-5" />
+        <input
+          type="checkbox"
+          checked={isUrgent}
+          onChange={(event) => setIsUrgent(event.target.checked)}
+          className="h-5 w-5"
+        />
       </label>
 
       <button

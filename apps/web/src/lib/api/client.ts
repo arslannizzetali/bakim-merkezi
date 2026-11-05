@@ -96,8 +96,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   }
 
   const payload = (await response.json()) as
-    | ApiEnvelope<T>
-    | { success: false; error: { code: string; message: string; details?: ApiErrorDetail[] } };
+    ApiEnvelope<T> | { success: false; error: { code: string; message: string; details?: ApiErrorDetail[] } };
   if (!response.ok || !payload.success) {
     const errorPayload = payload as {
       success: false;

@@ -1,6 +1,14 @@
 import bcrypt from "bcrypt";
 import { randomUUID } from "node:crypto";
-import type { CareType, DocumentPriority, MobilityLevel, PatientStatus, Prisma, Role, UpdateType } from "@prisma/client";
+import type {
+  CareType,
+  DocumentPriority,
+  MobilityLevel,
+  PatientStatus,
+  Prisma,
+  Role,
+  UpdateType
+} from "@prisma/client";
 import { prisma } from "../src/config/database.js";
 import { encryptionService } from "../src/services/encryption.service.js";
 import { storageService } from "../src/services/storage.service.js";
@@ -12,10 +20,34 @@ const adminPassword = resolveSeedPassword("SEED_ADMIN_PASSWORD");
 const employeePassword = resolveSeedPassword("SEED_EMPLOYEE_PASSWORD");
 
 const users = [
-  { email: "admin@bakimevi.com", password: adminPassword.password, role: "ADMIN", firstName: "Admin", lastName: "Yönetici" },
-  { email: "ahmet@bakimevi.com", password: employeePassword.password, role: "EMPLOYEE", firstName: "Ahmet", lastName: "Demir" },
-  { email: "mehmet@bakimevi.com", password: employeePassword.password, role: "EMPLOYEE", firstName: "Mehmet", lastName: "Kaya" },
-  { email: "fatma@bakimevi.com", password: employeePassword.password, role: "EMPLOYEE", firstName: "Fatma", lastName: "Şahin" }
+  {
+    email: "admin@bakimevi.com",
+    password: adminPassword.password,
+    role: "ADMIN",
+    firstName: "Admin",
+    lastName: "Yönetici"
+  },
+  {
+    email: "ahmet@bakimevi.com",
+    password: employeePassword.password,
+    role: "EMPLOYEE",
+    firstName: "Ahmet",
+    lastName: "Demir"
+  },
+  {
+    email: "mehmet@bakimevi.com",
+    password: employeePassword.password,
+    role: "EMPLOYEE",
+    firstName: "Mehmet",
+    lastName: "Kaya"
+  },
+  {
+    email: "fatma@bakimevi.com",
+    password: employeePassword.password,
+    role: "EMPLOYEE",
+    firstName: "Fatma",
+    lastName: "Şahin"
+  }
 ] satisfies Array<{ email: string; password: string; role: Role; firstName: string; lastName: string }>;
 
 const patientSeed = [

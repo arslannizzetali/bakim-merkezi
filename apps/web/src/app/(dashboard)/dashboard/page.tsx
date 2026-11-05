@@ -30,14 +30,28 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {isAdmin ? (
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Aktif Hasta" value={stats?.activePatients ?? "-"} helper="Güncel hasta sayısı" icon={UserRound} />
+          <StatCard
+            label="Aktif Hasta"
+            value={stats?.activePatients ?? "-"}
+            helper="Güncel hasta sayısı"
+            icon={UserRound}
+          />
           <StatCard
             label="Toplam Evrak"
-            value={(stats?.totalDocuments.red ?? 0) + (stats?.totalDocuments.yellow ?? 0) + (stats?.totalDocuments.green ?? 0)}
+            value={
+              (stats?.totalDocuments.red ?? 0) +
+              (stats?.totalDocuments.yellow ?? 0) +
+              (stats?.totalDocuments.green ?? 0)
+            }
             helper={`🔴${stats?.totalDocuments.red ?? 0} 🟡${stats?.totalDocuments.yellow ?? 0} 🟢${stats?.totalDocuments.green ?? 0}`}
             icon={FileText}
           />
-          <StatCard label="Bugün Güncelleme" value={stats?.todayUpdates ?? "-"} helper="Tüm çalışanlar" icon={Activity} />
+          <StatCard
+            label="Bugün Güncelleme"
+            value={stats?.todayUpdates ?? "-"}
+            helper="Tüm çalışanlar"
+            icon={Activity}
+          />
           <StatCard label="Aktif Çalışan" value={stats?.activeEmployees ?? "-"} helper="Bakım personeli" icon={Users} />
         </section>
       ) : (
@@ -49,10 +63,16 @@ export default function DashboardPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1fr_420px]">
         <div className="rounded-2xl border border-border bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-text">{isAdmin ? "Son Güncellemeler" : "Kendi Son Güncellemelerim"}</h2>
+          <h2 className="mb-4 text-lg font-bold text-text">
+            {isAdmin ? "Son Güncellemeler" : "Kendi Son Güncellemelerim"}
+          </h2>
           <div className="space-y-3">
-            {updatesQuery.data?.map((update) => <UpdateCard key={update.id} update={update} />)}
-            {!updatesQuery.data?.length ? <p className="rounded-xl bg-surface p-4 text-sm text-muted">Kayıt bulunamadı.</p> : null}
+            {updatesQuery.data?.map((update) => (
+              <UpdateCard key={update.id} update={update} />
+            ))}
+            {!updatesQuery.data?.length ? (
+              <p className="rounded-xl bg-surface p-4 text-sm text-muted">Kayıt bulunamadı.</p>
+            ) : null}
           </div>
         </div>
         <div className="rounded-2xl border border-red-200 bg-red-50/50 p-5 shadow-sm">
@@ -61,7 +81,11 @@ export default function DashboardPage() {
             <h2 className="text-lg font-bold">Acil Güncellemeler</h2>
           </div>
           <div className="space-y-3">
-            {updatesQuery.data?.filter((update) => update.isUrgent).map((update) => <UpdateCard key={update.id} update={update} />)}
+            {updatesQuery.data
+              ?.filter((update) => update.isUrgent)
+              .map((update) => (
+                <UpdateCard key={update.id} update={update} />
+              ))}
             {!updatesQuery.data?.some((update) => update.isUrgent) ? (
               <p className="rounded-xl bg-white p-4 text-sm text-muted">Acil güncelleme yok.</p>
             ) : null}

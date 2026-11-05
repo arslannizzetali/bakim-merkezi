@@ -34,7 +34,11 @@ interface LogoutUser {
 }
 
 export class AuthService {
-  async login(email: string, password: string, context: LoginContext): Promise<{ user: PublicUser; tokens: TokenPair }> {
+  async login(
+    email: string,
+    password: string,
+    context: LoginContext
+  ): Promise<{ user: PublicUser; tokens: TokenPair }> {
     await this.assertNotBanned(email, context.ipAddress);
 
     const user = await prisma.user.findFirst({
@@ -220,10 +224,7 @@ export class AuthService {
   private async assertNotBanned(email: string, ipAddress: string): Promise<void> {
     const banned = await redis.get(this.banKey(email, ipAddress));
     if (banned) {
-      throw new ForbiddenError(
-        "TOO_MANY_ATTEMPTS",
-        "Çok fazla başarısız deneme. 15 dakika sonra tekrar deneyin."
-      );
+      throw new ForbiddenError("TOO_MANY_ATTEMPTS", "Çok fazla başarısız deneme. 15 dakika sonra tekrar deneyin.");
     }
   }
 

@@ -1,4 +1,12 @@
-import type { CareType, DocumentPriority, MobilityLevel, PatientMood, PatientStatus, Role, UpdateType } from "@bakimevi/shared-types";
+import type {
+  CareType,
+  DocumentPriority,
+  MobilityLevel,
+  PatientMood,
+  PatientStatus,
+  Role,
+  UpdateType
+} from "@bakimevi/shared-types";
 
 export interface User {
   id: string;

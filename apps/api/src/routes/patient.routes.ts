@@ -22,7 +22,11 @@ patientRoutes.use(authenticate);
 patientRoutes.get("/", validate({ query: patientQuerySchema }), patientController.list);
 patientRoutes.post("/", validate({ body: createPatientSchema }), patientController.create);
 patientRoutes.get("/:id", validate({ params: patientIdParamSchema }), patientController.get);
-patientRoutes.patch("/:id", validate({ params: patientIdParamSchema, body: updatePatientSchema }), patientController.update);
+patientRoutes.patch(
+  "/:id",
+  validate({ params: patientIdParamSchema, body: updatePatientSchema }),
+  patientController.update
+);
 patientRoutes.delete("/:id", requireAdmin, validate({ params: patientIdParamSchema }), patientController.delete);
 
 patientRoutes.post(
@@ -44,8 +48,4 @@ patientRoutes.post(
   validate({ body: documentPrioritySchema }),
   documentController.upload
 );
-patientRoutes.get(
-  "/:id/documents",
-  validate({ params: patientIdParamSchema }),
-  documentController.listForPatient
-);
+patientRoutes.get("/:id/documents", validate({ params: patientIdParamSchema }), documentController.listForPatient);

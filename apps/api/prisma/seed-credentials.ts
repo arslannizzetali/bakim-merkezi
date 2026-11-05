@@ -8,7 +8,9 @@ type Env = Record<string, string | undefined>;
  */
 export function assertSeedAllowed(env: Env = process.env): void {
   if (env.NODE_ENV === "production") {
-    throw new Error("Refusing to run the development seed with NODE_ENV=production. Use prisma/seed-tenant.ts for production tenants.");
+    throw new Error(
+      "Refusing to run the development seed with NODE_ENV=production. Use prisma/seed-tenant.ts for production tenants."
+    );
   }
 }
 

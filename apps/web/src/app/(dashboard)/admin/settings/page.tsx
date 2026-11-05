@@ -66,7 +66,9 @@ function PolicyCard({
   setDays: (value: number) => void;
 }) {
   return (
-    <section className={`rounded-3xl border p-6 ${tone === "yellow" ? "border-yellow-300 bg-yellow-50" : "border-green-300 bg-green-50"}`}>
+    <section
+      className={`rounded-3xl border p-6 ${tone === "yellow" ? "border-yellow-300 bg-yellow-50" : "border-green-300 bg-green-50"}`}
+    >
       <h2 className="mb-4 text-xl font-bold text-text">{title}</h2>
       <label className="mb-4 flex items-center justify-between rounded-2xl bg-white p-4">
         <span className="font-semibold">Otomatik silme</span>

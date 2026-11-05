@@ -40,9 +40,15 @@ export function PatientCard({ patient }: { patient: Patient }) {
       </div>
 
       <div className="mb-4 flex gap-2 text-xs font-semibold">
-        <span className="rounded-full bg-red-50 px-3 py-1 text-red-800">🔴 {patient.documentCounts?.red ?? 0} evrak</span>
-        <span className="rounded-full bg-yellow-50 px-3 py-1 text-yellow-800">🟡 {patient.documentCounts?.yellow ?? 0} evrak</span>
-        <span className="rounded-full bg-green-50 px-3 py-1 text-green-800">🟢 {patient.documentCounts?.green ?? 0} evrak</span>
+        <span className="rounded-full bg-red-50 px-3 py-1 text-red-800">
+          🔴 {patient.documentCounts?.red ?? 0} evrak
+        </span>
+        <span className="rounded-full bg-yellow-50 px-3 py-1 text-yellow-800">
+          🟡 {patient.documentCounts?.yellow ?? 0} evrak
+        </span>
+        <span className="rounded-full bg-green-50 px-3 py-1 text-green-800">
+          🟢 {patient.documentCounts?.green ?? 0} evrak
+        </span>
       </div>
 
       <Link href={`/patients/${patient.id}`} className="inline-flex items-center gap-2 font-semibold text-primary">

@@ -6,9 +6,4 @@ import { validate } from "../middleware/validate.js";
 
 export const publicRoutes = Router();
 
-publicRoutes.post(
-  "/demo-requests",
-  publicLimiter,
-  validate({ body: demoRequestSchema }),
-  demoRequestController.create
-);
+publicRoutes.post("/demo-requests", publicLimiter, validate({ body: demoRequestSchema }), demoRequestController.create);

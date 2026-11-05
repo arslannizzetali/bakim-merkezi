@@ -38,7 +38,12 @@ export function DemoRequestForm({ onDone }: { onDone: () => void }) {
     >
       <p className="text-sm text-muted">Kurum bilgilerinizi bırakın, size dönüş yapalım.</p>
 
-      <Field label="Kurum Adı" value={institutionName} onChange={setInstitutionName} placeholder="Örn. Çamlıca Bakım Merkezi" />
+      <Field
+        label="Kurum Adı"
+        value={institutionName}
+        onChange={setInstitutionName}
+        placeholder="Örn. Çamlıca Bakım Merkezi"
+      />
       <Field label="Yetkili Adı" value={contactName} onChange={setContactName} placeholder="Ad Soyad" />
       <Field label="Telefon" value={phone} onChange={setPhone} placeholder="05XXXXXXXXX" type="tel" />
       <Field label="E-posta" value={email} onChange={setEmail} placeholder="kurum@ornek.com" type="email" />

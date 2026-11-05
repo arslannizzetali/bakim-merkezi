@@ -259,7 +259,9 @@ function countDocuments(documents: Array<{ priority: "RED" | "YELLOW" | "GREEN" 
 export const patientService = new PatientService();
 
 /** Encrypted columns are internal; they are never sent to API clients. */
-function withoutEncryptedFields<T extends { tcNumberEncrypted?: string | null }>(patient: T): Omit<T, "tcNumberEncrypted"> {
+function withoutEncryptedFields<T extends { tcNumberEncrypted?: string | null }>(
+  patient: T
+): Omit<T, "tcNumberEncrypted"> {
   const { tcNumberEncrypted: _omitted, ...rest } = patient;
   return rest;
 }

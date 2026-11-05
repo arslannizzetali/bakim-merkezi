@@ -9,9 +9,24 @@ import { patientApi } from "@/lib/api/patient.api";
 import { cn } from "@/lib/utils";
 
 const priorities = [
-  { value: "RED", title: "Kırmızı", description: "Kritik, hiçbir zaman silinemez", className: "border-red-300 bg-red-50 text-red-800" },
-  { value: "YELLOW", title: "Sarı", description: "Yarı önemli, 90 gün saklanır", className: "border-yellow-300 bg-yellow-50 text-yellow-800" },
-  { value: "GREEN", title: "Yeşil", description: "Standart, 30 gün saklanır", className: "border-green-300 bg-green-50 text-green-800" }
+  {
+    value: "RED",
+    title: "Kırmızı",
+    description: "Kritik, hiçbir zaman silinemez",
+    className: "border-red-300 bg-red-50 text-red-800"
+  },
+  {
+    value: "YELLOW",
+    title: "Sarı",
+    description: "Yarı önemli, 90 gün saklanır",
+    className: "border-yellow-300 bg-yellow-50 text-yellow-800"
+  },
+  {
+    value: "GREEN",
+    title: "Yeşil",
+    description: "Standart, 30 gün saklanır",
+    className: "border-green-300 bg-green-50 text-green-800"
+  }
 ] as const;
 
 export function DocumentUploadForm() {
@@ -81,7 +96,10 @@ export function DocumentUploadForm() {
             key={item.value}
             type="button"
             onClick={() => setPriority(item.value)}
-            className={cn("rounded-2xl border p-5 text-left", priority === item.value ? item.className : "border-border bg-white text-text")}
+            className={cn(
+              "rounded-2xl border p-5 text-left",
+              priority === item.value ? item.className : "border-border bg-white text-text"
+            )}
           >
             <p className="text-lg font-bold">{item.title}</p>
             <p className="mt-2 text-sm">{item.description}</p>

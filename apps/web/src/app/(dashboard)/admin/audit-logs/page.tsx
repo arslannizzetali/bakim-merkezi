@@ -12,8 +12,20 @@ export default function AuditLogsPage() {
 
   const rows =
     query.data?.map((log) => {
-      const item = log as { action?: string; resourceType?: string; resourceId?: string; ipAddress?: string; performedAt?: string };
-      return [item.performedAt ?? "-", item.action ?? "-", item.resourceType ?? "-", item.resourceId ?? "-", item.ipAddress ?? "-"];
+      const item = log as {
+        action?: string;
+        resourceType?: string;
+        resourceId?: string;
+        ipAddress?: string;
+        performedAt?: string;
+      };
+      return [
+        item.performedAt ?? "-",
+        item.action ?? "-",
+        item.resourceType ?? "-",
+        item.resourceId ?? "-",
+        item.ipAddress ?? "-"
+      ];
     }) ?? [];
 
   return (

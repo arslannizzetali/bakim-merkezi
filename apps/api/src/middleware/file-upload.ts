@@ -59,9 +59,7 @@ function assertMagicBytes(buffer: Buffer, mimeType: string): void {
   const isValid =
     (mimeType === "application/pdf" && buffer.subarray(0, 4).toString("ascii") === "%PDF") ||
     (mimeType === "image/jpeg" && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) ||
-    (mimeType === "image/png" &&
-      buffer[0] === 0x89 &&
-      buffer.subarray(1, 4).toString("ascii") === "PNG") ||
+    (mimeType === "image/png" && buffer[0] === 0x89 && buffer.subarray(1, 4).toString("ascii") === "PNG") ||
     (mimeType === "image/webp" &&
       buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
       buffer.subarray(8, 12).toString("ascii") === "WEBP") ||

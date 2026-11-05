@@ -1,9 +1,9 @@
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL = process.env.DATABASE_URL ?? "postgresql://bakim_user:bakim_pass@localhost:5433/bakim_test";
-process.env.TEST_DATABASE_URL = process.env.TEST_DATABASE_URL ?? "postgresql://bakim_user:bakim_pass@localhost:5433/bakim_test";
+process.env.TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ?? "postgresql://bakim_user:bakim_pass@localhost:5433/bakim_test";
 process.env.REDIS_URL = process.env.REDIS_URL ?? "redis://localhost:6379";
-process.env.JWT_SECRET =
-  process.env.JWT_SECRET ?? "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+process.env.JWT_SECRET = process.env.JWT_SECRET ?? "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 process.env.JWT_REFRESH_SECRET =
   process.env.JWT_REFRESH_SECRET ?? "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789";
 process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? "15m";

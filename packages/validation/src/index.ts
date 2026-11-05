@@ -5,7 +5,11 @@ const phoneRegex = /^(\+90|0)?[1-9]\d{9}$/;
 const tcRegex = /^\d{11}$/;
 
 const optionalTrimmed = (max: number) =>
-  z.string().max(max).transform((value) => value.trim()).optional();
+  z
+    .string()
+    .max(max)
+    .transform((value) => value.trim())
+    .optional();
 
 export const idParamSchema = z.object({
   id: z.string().uuid("Geçersiz ID")
@@ -30,8 +34,16 @@ export const loginSchema = z.object({
 });
 
 export const demoRequestSchema = z.object({
-  institutionName: z.string().min(2, "Kurum adı zorunludur").max(150).transform((value) => value.trim()),
-  contactName: z.string().min(2, "Yetkili adı zorunludur").max(100).transform((value) => value.trim()),
+  institutionName: z
+    .string()
+    .min(2, "Kurum adı zorunludur")
+    .max(150)
+    .transform((value) => value.trim()),
+  contactName: z
+    .string()
+    .min(2, "Yetkili adı zorunludur")
+    .max(100)
+    .transform((value) => value.trim()),
   phone: z.string().regex(phoneRegex, "Geçerli telefon numarası giriniz"),
   email: z.string().email("Geçerli e-posta giriniz").max(255).toLowerCase().trim(),
   message: optionalTrimmed(2000)
@@ -40,8 +52,18 @@ export const demoRequestSchema = z.object({
 export const createUserSchema = z.object({
   email: z.string().email("Geçerli e-posta giriniz").max(255).toLowerCase().trim(),
   password: z.string().min(8, "Şifre en az 8 karakter olmalıdır").max(128),
-  firstName: z.string().min(2).max(50).regex(turkishNameRegex).transform((value) => value.trim()),
-  lastName: z.string().min(2).max(50).regex(turkishNameRegex).transform((value) => value.trim()),
+  firstName: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(turkishNameRegex)
+    .transform((value) => value.trim()),
+  lastName: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(turkishNameRegex)
+    .transform((value) => value.trim()),
   role: z.enum(["ADMIN", "EMPLOYEE"]).default("EMPLOYEE"),
   isActive: z.boolean().default(true)
 });
@@ -62,13 +84,27 @@ export const userQuerySchema = paginationQuerySchema.extend({
 });
 
 export const createPatientSchema = z.object({
-  firstName: z.string().min(2).max(50).regex(turkishNameRegex).transform((value) => value.trim()),
-  lastName: z.string().min(2).max(50).regex(turkishNameRegex).transform((value) => value.trim()),
+  firstName: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(turkishNameRegex)
+    .transform((value) => value.trim()),
+  lastName: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(turkishNameRegex)
+    .transform((value) => value.trim()),
   birthDate: z.coerce.date(),
   gender: z.enum(["MALE", "FEMALE"]),
   tcNumber: z.string().regex(tcRegex, "TC kimlik 11 rakam olmalıdır").optional(),
   careType: z.enum(["ELDERLY", "DISABLED", "BOTH"]),
-  roomNumber: z.string().max(20).transform((value) => value.trim()).optional(),
+  roomNumber: z
+    .string()
+    .max(20)
+    .transform((value) => value.trim())
+    .optional(),
   admissionDate: z.coerce.date(),
   status: z.enum(["ACTIVE", "DISCHARGED", "TRANSFERRED"]).default("ACTIVE"),
   diagnosis: optionalTrimmed(5000),
@@ -76,9 +112,17 @@ export const createPatientSchema = z.object({
   currentMedications: optionalTrimmed(5000),
   mobilityLevel: z.enum(["INDEPENDENT", "ASSISTED", "BEDRIDDEN"]),
   dietaryNeeds: optionalTrimmed(5000),
-  emergencyContactName: z.string().min(2).max(100).transform((value) => value.trim()),
+  emergencyContactName: z
+    .string()
+    .min(2)
+    .max(100)
+    .transform((value) => value.trim()),
   emergencyContactPhone: z.string().regex(phoneRegex, "Geçerli telefon numarası giriniz"),
-  emergencyContactRelation: z.string().min(2).max(50).transform((value) => value.trim()),
+  emergencyContactRelation: z
+    .string()
+    .min(2)
+    .max(50)
+    .transform((value) => value.trim()),
   notes: optionalTrimmed(5000)
 });
 
@@ -95,7 +139,11 @@ export const patientQuerySchema = paginationQuerySchema.extend({
 
 export const createPatientUpdateSchema = z.object({
   updateType: z.enum(["MEDICATION", "CARE", "OBSERVATION", "STATUS_CHANGE", "VITAL_SIGNS", "INCIDENT"]),
-  content: z.string().min(3, "Açıklama zorunludur").max(5000).transform((value) => value.trim()),
+  content: z
+    .string()
+    .min(3, "Açıklama zorunludur")
+    .max(5000)
+    .transform((value) => value.trim()),
   medicationsGiven: z
     .array(
       z.object({

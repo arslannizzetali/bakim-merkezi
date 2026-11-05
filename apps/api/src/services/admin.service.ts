@@ -20,8 +20,15 @@ export class AdminService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [activePatients, activeEmployees, todayUpdates, urgentUpdates, redDocuments, yellowDocuments, greenDocuments] =
-      await prisma.$transaction([
+    const [
+      activePatients,
+      activeEmployees,
+      todayUpdates,
+      urgentUpdates,
+      redDocuments,
+      yellowDocuments,
+      greenDocuments
+    ] = await prisma.$transaction([
       prisma.patient.count({ where: { status: "ACTIVE", deletedAt: null } }),
       prisma.user.count({ where: { role: "EMPLOYEE", isActive: true, deletedAt: null } }),
       prisma.patientUpdate.count({ where: { createdAt: { gte: today } } }),

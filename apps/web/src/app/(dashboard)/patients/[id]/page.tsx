@@ -63,7 +63,11 @@ export default function PatientDetailPage() {
   }
 
   function handleDelete(): void {
-    if (window.confirm(`${patient!.firstName} ${patient!.lastName} kaydını silmek istediğine emin misin? Bu işlem geri alınamaz.`)) {
+    if (
+      window.confirm(
+        `${patient!.firstName} ${patient!.lastName} kaydını silmek istediğine emin misin? Bu işlem geri alınamaz.`
+      )
+    ) {
       deleteMutation.mutate();
     }
   }
@@ -117,7 +121,8 @@ export default function PatientDetailPage() {
           <InfoBox label="Hareketlilik" value={patient.mobilityLevel} />
         </div>
         <div className="mt-4 rounded-2xl bg-surface p-4 text-sm text-text">
-          Acil İletişim: {patient.emergencyContactName} ({patient.emergencyContactRelation}) - {patient.emergencyContactPhone}
+          Acil İletişim: {patient.emergencyContactName} ({patient.emergencyContactRelation}) -{" "}
+          {patient.emergencyContactPhone}
         </div>
       </section>
 
@@ -127,12 +132,17 @@ export default function PatientDetailPage() {
             <h3 className="flex items-center gap-2 text-xl font-bold text-text">
               <Plus className="h-5 w-5" /> Güncellemeler
             </h3>
-            <Link href={`/patients/${patient.id}/update`} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white">
+            <Link
+              href={`/patients/${patient.id}/update`}
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white"
+            >
               Yeni Güncelleme Ekle
             </Link>
           </div>
           <div className="space-y-3">
-            {patient.patientUpdates?.map((update) => <UpdateCard key={update.id} update={update} />)}
+            {patient.patientUpdates?.map((update) => (
+              <UpdateCard key={update.id} update={update} />
+            ))}
           </div>
         </div>
 
@@ -144,7 +154,12 @@ export default function PatientDetailPage() {
             <FileText className="h-5 w-5" />
             Evrak Yükle / Yönet
           </Link>
-          <DocumentList title="Kritik Evraklar" hint="Bu evraklar hiçbir zaman silinemez" documents={documentsQuery.data?.red ?? []} tone="red" />
+          <DocumentList
+            title="Kritik Evraklar"
+            hint="Bu evraklar hiçbir zaman silinemez"
+            documents={documentsQuery.data?.red ?? []}
+            tone="red"
+          />
           <DocumentList title="Yarı Önemli Evraklar" documents={documentsQuery.data?.yellow ?? []} tone="yellow" />
           <DocumentList title="Standart Evraklar" documents={documentsQuery.data?.green ?? []} tone="green" />
         </div>
