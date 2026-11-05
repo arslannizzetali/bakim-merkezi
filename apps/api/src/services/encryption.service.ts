@@ -4,6 +4,8 @@ import { BadRequestError } from "../utils/errors.js";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
+/** 96-bit IV, the recommended size for GCM. */
+const GCM_IV_LENGTH = 12;
 const MASTER_KEY = Buffer.from(env.MASTER_ENCRYPTION_KEY, "hex");
 
 interface WrappedKey {
@@ -12,7 +14,10 @@ interface WrappedKey {
   authTag: string;
 }
 
-interface DeterministicCipherText {
+interface TcCipherText {
+  /** 2 = random IV. Absent on legacy values encrypted with a zero IV. */
+  v?: number;
+  iv?: string;
   data: string;
   authTag: string;
 }
@@ -58,20 +63,30 @@ export class EncryptionService {
     }
   }
 
+  /**
+   * Encrypts a national ID (TC) number with AES-256-GCM and a fresh random IV.
+   * The output is non-deterministic, so it cannot be used for equality search.
+   */
   encryptTc(tc: string): string {
-    const iv = Buffer.alloc(IV_LENGTH, 0);
+    const iv = crypto.randomBytes(GCM_IV_LENGTH);
     const cipher = crypto.createCipheriv(ALGORITHM, MASTER_KEY, iv);
     const encrypted = Buffer.concat([cipher.update(tc, "utf8"), cipher.final()]);
-    const payload: DeterministicCipherText = {
+    const payload: TcCipherText = {
+      v: 2,
+      iv: iv.toString("hex"),
       data: encrypted.toString("hex"),
       authTag: cipher.getAuthTag().toString("hex")
     };
     return JSON.stringify(payload);
   }
 
+  /**
+   * Decrypts both the current format (random IV) and the legacy format,
+   * which used a fixed all-zero IV and must only ever be read, never written.
+   */
   decryptTc(encrypted: string): string {
-    const payload = this.parseDeterministicCipherText(encrypted);
-    const iv = Buffer.alloc(IV_LENGTH, 0);
+    const payload = this.parseTcCipherText(encrypted);
+    const iv = payload.iv ? Buffer.from(payload.iv, "hex") : Buffer.alloc(IV_LENGTH, 0);
     const decipher = crypto.createDecipheriv(ALGORITHM, MASTER_KEY, iv);
     decipher.setAuthTag(Buffer.from(payload.authTag, "hex"));
     return Buffer.concat([decipher.update(Buffer.from(payload.data, "hex")), decipher.final()]).toString("utf8");
@@ -121,12 +136,13 @@ export class EncryptionService {
     return Buffer.concat([keyDecipher.update(Buffer.from(keyData.key, "hex")), keyDecipher.final()]);
   }
 
-  private parseDeterministicCipherText(encrypted: string): DeterministicCipherText {
-    const parsed = JSON.parse(encrypted) as Partial<DeterministicCipherText>;
+  private parseTcCipherText(encrypted: string): TcCipherText {
+    const parsed = JSON.parse(encrypted) as Partial<TcCipherText>;
     if (!parsed.data || !parsed.authTag) {
       throw new BadRequestError("INVALID_ENCRYPTED_VALUE", "Şifreli veri geçersiz");
     }
     return {
+      ...(parsed.iv ? { iv: parsed.iv } : {}),
       data: parsed.data,
       authTag: parsed.authTag
     };
