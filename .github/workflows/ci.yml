@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  check:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bakimevi/api exec prisma generate
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm --filter @bakimevi/api test
+      - run: pnpm build
+
+  integration:
+    name: Integration tests (PostgreSQL, Redis, MinIO)
+    runs-on: ubuntu-latest
+    needs: check
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bakim_user
+          POSTGRES_PASSWORD: bakim_pass
+          POSTGRES_DB: bakim_test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bakim_user -d bakim_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      NODE_ENV: test
+      RUN_INTEGRATION: "true"
+      DATABASE_URL: postgresql://bakim_user:bakim_pass@localhost:5433/bakim_test
+      TEST_DATABASE_URL: postgresql://bakim_user:bakim_pass@localhost:5433/bakim_test
+      REDIS_URL: redis://localhost:6379
+      MINIO_ENDPOINT: localhost
+      MINIO_PORT: "9000"
+      MINIO_ACCESS_KEY: ci-access-key
+      MINIO_SECRET_KEY: ci-secret-key-0123456789
+      JWT_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      JWT_REFRESH_SECRET: abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+      MASTER_ENCRYPTION_KEY: 1111111111111111111111111111111111111111111111111111111111111111
+      # Throwaway values for the CI database only.
+      SEED_ADMIN_PASSWORD: ci-admin-Password-1!
+      SEED_EMPLOYEE_PASSWORD: ci-employee-Password-1!
+    steps:
+      - uses: actions/checkout@v4
+      # MinIO needs a `server` command, which service containers cannot pass.
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=$MINIO_ACCESS_KEY -e MINIO_ROOT_PASSWORD=$MINIO_SECRET_KEY \
+            minio/minio server /data
+          for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply migrations
+        run: pnpm --filter @bakimevi/api exec prisma migrate deploy
+      - name: Seed test data
+        run: pnpm --filter @bakimevi/api exec prisma db seed
+      - name: Integration tests
+        run: pnpm --filter @bakimevi/api test
