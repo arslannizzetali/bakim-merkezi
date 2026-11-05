@@ -65,7 +65,7 @@ export class PatientService {
 
     return {
       data: patients.map((patient) => ({
-        ...patient,
+        ...withoutEncryptedFields(patient),
         documentCounts: countDocuments(patient.documents),
         documents: undefined
       })),
@@ -92,7 +92,7 @@ export class PatientService {
       userAgent: requester.userAgent
     });
 
-    return patient;
+    return withoutEncryptedFields(patient);
   }
 
   async getById(id: string, requester: Requester) {
@@ -114,7 +114,7 @@ export class PatientService {
     });
 
     return {
-      ...patient,
+      ...withoutEncryptedFields(patient),
       documentCounts: countDocuments(patient.documents)
     };
   }
@@ -137,7 +137,7 @@ export class PatientService {
       userAgent: requester.userAgent
     });
 
-    return patient;
+    return withoutEncryptedFields(patient);
   }
 
   async delete(id: string, requester: Requester): Promise<void> {
@@ -257,3 +257,9 @@ function countDocuments(documents: Array<{ priority: "RED" | "YELLOW" | "GREEN" 
 }
 
 export const patientService = new PatientService();
+
+/** Encrypted columns are internal; they are never sent to API clients. */
+function withoutEncryptedFields<T extends { tcNumberEncrypted?: string | null }>(patient: T): Omit<T, "tcNumberEncrypted"> {
+  const { tcNumberEncrypted: _omitted, ...rest } = patient;
+  return rest;
+}
