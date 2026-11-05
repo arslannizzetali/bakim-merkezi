@@ -89,6 +89,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Apply migrations
         run: pnpm --filter @bakimevi/api exec prisma migrate deploy
+      - name: Check migrations match schema.prisma
+        run: pnpm --filter @bakimevi/api exec prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
       - name: Seed test data
         run: pnpm --filter @bakimevi/api exec prisma db seed
       - name: Integration tests
