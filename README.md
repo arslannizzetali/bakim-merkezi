@@ -1,529 +1,181 @@
 # BakımEvi — Care Facility Management System
 
-<div align="center">
+**Patient tracking and encrypted document management for elderly and disability care facilities.**
 
-[🇬🇧 English](#english) &nbsp;|&nbsp; [🇹🇷 Türkçe](#türkçe)
+[![CI](https://github.com/arslannizzetali/bakim-merkezi/actions/workflows/ci.yml/badge.svg)](https://github.com/arslannizzetali/bakim-merkezi/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs)
+![Express](https://img.shields.io/badge/Express-4-000000?logo=express)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma)
 
-</div>
+🇹🇷 [Türkçe README](README.tr.md)
 
----
+<!-- TODO(izzet): add screenshots (dashboard, patient detail, document upload) to docs/screenshots/ and reference them here. Use seed data only — never real patient data. -->
 
-<a id="english"></a>
+## Why this project?
 
-## English
+Care facilities that look after elderly and disabled residents still track much of their daily work on paper: medication given, vital signs, incidents, and the documents that come with each resident. That makes it hard to see who did what, and sensitive health documents end up in folders and shared drives.
 
-BakımEvi is an in-house patient tracking and document management system built for care facilities serving elderly and disabled residents (nursing homes, disability care homes, etc.). It is designed for intranet use within a single institution, not for general public internet access.
+BakımEvi gives care staff one place to record daily patient updates and store documents, with role-based access, encryption of sensitive data, and an audit trail of who viewed or changed what.
 
-### Live Deployment
+The project was designed and built in response to the requirements of a care facility.
 
-The system was designed in response to the requirements of a care facility.
+<!-- TODO(izzet): once delivered, add: number of staff users, number of residents, and how long it has been in use. -->
 
+## Features
 
+- **Patient records** — registration, search and filters (status, care type, mobility, admission date), quick access by room number
+- **Daily updates** — medication, care performed, observation, vital signs, status change and incident entries, with mood tracking and an urgent flag
+- **Document management** — upload PDF, JPEG, PNG, WEBP, DOCX and XLSX files with a priority:
 
+  | Priority | Meaning | Rule |
+  | --- | --- | --- |
+  | `RED` | Critical | Can never be deleted, by any role |
+  | `YELLOW` | Semi-important | Admin can delete; auto-deleted after 90 days by default |
+  | `GREEN` | Standard | Admin can delete; auto-deleted after 30 days by default |
 
-### Roles
+- **Admin panel** — employee management, all patients and updates, recent/urgent updates, audit log viewer, retention policy settings
+- **Multi-tenant deployment** — one script provisions an isolated database, Redis index, storage bucket, containers and HTTPS subdomain per facility
 
-- `ADMIN`: manages employees, sees all patients and all updates, monitors audit logs, and sets document retention policies.
-- `EMPLOYEE`: registers patients, searches patients, enters daily patient updates, and downloads documents they uploaded.
-
-### Core Features
-
-- Patient registration and record tracking
-- Patient search, filtering, and quick access by room number
-- Medication, care, observation, vital signs, status change, and incident/accident updates
-- Marking updates as urgent
-- Patient mood tracking: good, medium, bad
-- Document upload, download, prioritization, and retention policy
-- Code-level delete protection for `RED` documents
-- Admin panel, employee management, audit log, and recent updates
-- AES-256-based encryption for national ID numbers and file contents
-- JWT access tokens, refresh token rotation, and Redis-based brute-force protection
-
-### System Flow
-
-**1. Login** — Users sign in with email and password at `/login`. After a successful login, the dashboard and menus are shown based on the user's role.
-
-Default seed users:
-
-| Role | Email | Password |
-| --- | --- | --- |
-| Admin | `admin@bakimevi.com` | `ChangeMe-Admin-1!` |
-| Employee | `ahmet@bakimevi.com` | `ChangeMe-Employee-1!` |
-| Employee | `mehmet@bakimevi.com` | `ChangeMe-Employee-1!` |
-| Employee | `fatma@bakimevi.com` | `ChangeMe-Employee-1!` |
-
-**2. Patient Registration** — Both Admin and Employee roles can create new patient records at `/patients/new`, entering: full name, date of birth, gender, national ID number, room number, care type (elderly, disabled, or both), mobility level (independent, assisted, or bedridden), emergency contact and phone, allergies, and ongoing medications.
-
-The national ID number is encrypted on the API side before storage. After a successful registration, the user is redirected to the patient detail page.
-
-**3. Patient Detail and Tracking** — The patient detail page shows patient information, emergency contact, allergies, ongoing medications, mobility status, updates, and documents together. Key actions include adding new updates, uploading and managing documents, viewing critical/semi-important/standard documents in separate lists, and reviewing prior updates in chronological order.
-
-**4. Entering a Patient Update** — New tracking entries are added at `/patients/:id/update`.
-
-Update types: medication given, care performed, observation, status changed, vital signs, incident/accident.
-
-The update form opens extra fields depending on the selected type: medication name, dose, and route for medication entries; blood pressure, pulse, and temperature for vitals; bathing assistance, feeding assistance, physical therapy, wound care, psychological support, exercise, medication reminders, and clothing change for care entries. Every update also records the patient's mood and an urgent-status flag.
-
-**5. Document Management** — Patient documents are uploaded at `/patients/:id/documents`. Supported file types are PDF, JPEG, PNG, WEBP, DOCX, and XLSX.
-
-Document priorities:
-
-| Priority | Meaning | Rule |
-| --- | --- | --- |
-| `RED` | Critical document | Cannot be deleted by anyone |
-| `YELLOW` | Semi-important document | Admin can delete, default retention 90 days |
-| `GREEN` | Standard document | Admin can delete, default retention 30 days |
-
-Files are encrypted with AES-256-GCM before being uploaded to MinIO. The database never stores the original file, plain-text national ID, or plain-text file key.
-
-**6. Admin Panel** — The Admin role has access to: employee list and creation, filtering all patient records, viewing all patient updates, a panel for recent and urgent updates, audit log records, and document retention policy settings.
-
-### Permission Matrix
+### Roles and permissions
 
 | Action | Admin | Employee |
+| --- | :-: | :-: |
+| Create, delete, list employees | ✅ | ❌ |
+| View all audit logs | ✅ | ❌ |
+| View all patient updates | ✅ | ❌ |
+| Create and view patients | ✅ | ✅ |
+| Delete patients (soft delete) | ✅ | ❌ |
+| Enter patient updates / view own updates | ✅ | ✅ |
+| Upload documents | ✅ | ✅ |
+| Download own documents | ✅ | ✅ |
+| Download another employee's documents | ✅ | ❌ |
+| Delete `RED` documents | ❌ | ❌ |
+| Delete `YELLOW` / `GREEN` documents | ✅ | ❌ |
+| Change retention policies | ✅ | ❌ |
+
+Every row is covered by an integration test in [`tests/integration/permission-matrix.integration.test.ts`](tests/integration/permission-matrix.integration.test.ts).
+
+## Security design
+
+- **Files** are encrypted with AES-256-GCM before they reach object storage. Each file gets its own random key and IV; the file key is wrapped with a master key (envelope encryption) and the GCM auth tag plus a SHA-256 checksum are verified on download.
+- **National ID (TC) numbers** are encrypted with AES-256-GCM and a random IV per value.
+- **Authentication** uses short-lived JWT access tokens and refresh tokens in an `httpOnly` cookie. Refresh tokens are single-use and rotated; reusing one revokes the whole session family.
+- **Brute-force protection** — Redis-backed rate limiting plus a per account/IP lockout after repeated failed logins.
+- **Uploads** are checked by extension, declared MIME type *and* file signature (magic bytes), limited to 50 MB, and stored under a random UUID name.
+- **Audit log** records logins, failed logins, patient views/searches/changes and document actions. The application never updates or deletes audit entries.
+- **Hardening** — Helmet security headers and CSP, CORS restricted to configured origins, Zod validation on every input, bcrypt (cost 12) password hashing, startup fails in production if secrets are missing or default MinIO credentials are used.
+
+Details: [`docs/DATA_PROTECTION.md`](docs/DATA_PROTECTION.md).
+
+## Tech stack
+
+| Layer | Choice | Why |
 | --- | --- | --- |
-| Create, delete, list employees | Yes | No |
-| View all audit logs | Yes | No |
-| View all patient updates | Yes | No |
-| Create and view patients | Yes | Yes |
-| Enter patient updates | Yes | Yes |
-| View own updates | Yes | Yes |
-| Upload documents | Yes | Yes |
-| Download own uploaded documents | Yes | Yes |
-| Download another employee's documents | Yes | No |
-| Delete `RED` documents | No | No |
-| Delete `YELLOW`/`GREEN` documents | Yes | No |
-| Retention policy settings | Yes | No |
+| Frontend | Next.js 14 (App Router), React 18, Tailwind CSS, TanStack Query, Zustand, React Hook Form + Zod | Server/client rendering in one framework; Query handles caching and token refresh retries |
+| API | Express 4, TypeScript | Small, explicit middleware chain that is easy to audit for a security-sensitive app |
+| Database | PostgreSQL 16 + Prisma 5 | Relational data with strong typing and versioned migrations |
+| Cache / queue | Redis 7 + Bull | Rate limiting, token state and the nightly retention job |
+| Object storage | MinIO (S3-compatible) | Self-hosted, so health documents never leave the facility's infrastructure |
+| Validation | Zod, shared between web and API (`packages/validation`) | One source of truth for input rules |
+| Tooling | pnpm workspaces, Turbo, Vitest, ESLint, Prettier, GitHub Actions | |
 
-### Tech Stack
+## Architecture
 
-**Frontend:** Next.js 14 App Router, React 18, TypeScript 5, Tailwind CSS, TanStack Query, Zustand, React Hook Form + Zod, Lucide React
+```mermaid
+flowchart LR
+  user[Browser] -->|HTTPS| caddy[Caddy reverse proxy]
+  caddy -->|/| web[Next.js web]
+  caddy -->|/api/*| api[Express API]
+  web -->|REST + JWT| api
+  api --> pg[(PostgreSQL)]
+  api --> redis[(Redis)]
+  api -->|encrypted files| minio[(MinIO)]
+  redis --> bull[Bull queue]
+  bull -->|nightly 02:00| retention[Retention job]
+  retention --> pg
+  retention --> minio
+```
 
-**Backend:** Node.js 20, Express, TypeScript, Prisma, PostgreSQL 16, Redis 7, Bull queue, MinIO, bcrypt, jsonwebtoken, Node.js crypto
+In production each facility (tenant) gets its own `web` and `api` containers, PostgreSQL database and role, Redis database index and MinIO bucket, behind a shared Caddy instance that terminates HTTPS. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
-**Monorepo:** pnpm workspace, Turbo
+<!-- TODO(izzet): confirm the production setup described above (internet-facing server with Caddy + HTTPS, one tenant per facility) matches how you will deliver it. -->
 
-### Project Structure
+## Getting started
+
+**Requirements:** Node.js 22, Corepack, Docker.
+
+```bash
+corepack enable
+corepack pnpm install
+corepack pnpm generate:secrets   # writes JWT and encryption keys to .env
+
+docker compose up -d             # PostgreSQL, Redis, MinIO
+
+corepack pnpm db:generate
+corepack pnpm db:migrate         # prisma migrate dev
+corepack pnpm db:seed            # development data only
+corepack pnpm dev
+```
+
+- Web: http://localhost:3000
+- API: http://localhost:3001 — readiness check at `/health`, liveness at `/health/live`
+- MinIO console: http://localhost:9001
+
+**Development seed users** are created by `pnpm db:seed`. Their passwords come from `SEED_ADMIN_PASSWORD` and `SEED_EMPLOYEE_PASSWORD` in `.env`; if those are empty, random passwords are generated and printed once. The seed refuses to run with `NODE_ENV=production`.
+
+## Running tests
+
+```bash
+corepack pnpm lint
+corepack pnpm typecheck
+corepack pnpm test                                     # unit tests
+RUN_INTEGRATION=true corepack pnpm --filter @bakimevi/api test   # needs a seeded test DB, Redis, MinIO
+```
+
+CI runs all of the above on every push, including the integration suite against PostgreSQL, Redis and MinIO containers and a check that migrations match `schema.prisma`.
+
+## Project structure
 
 ```text
 bakim-merkezi/
 ├── apps/
-│   ├── web/                 # Next.js web frontend
-│   └── api/                 # Express API and Prisma
+│   ├── api/                 # Express API, Prisma schema, migrations, seed
+│   └── web/                 # Next.js frontend
 ├── packages/
-│   ├── shared-types/        # Shared TypeScript types
-│   └── validation/          # Zod validation schemas
-├── docs/                    # Project documentation
-├── tests/                   # Test routing and agent notes
-├── security/                # Security notes
-├── research/                # Research and decision notes
-├── docker-compose.yml       # PostgreSQL, Redis, and MinIO
-└── package.json             # Monorepo commands
+│   ├── shared-types/        # Types shared by web and API
+│   └── validation/          # Zod schemas shared by web and API
+├── tests/                   # Unit and integration tests
+├── deploy/                  # Production Docker Compose and Caddy config
+├── scripts/                 # Tenant lifecycle and secret generation scripts
+├── docs/                    # Deployment and data protection docs
+├── research/, security/     # Design notes written as AI agent briefs (see below)
+└── docker-compose.yml       # Local PostgreSQL, Redis, MinIO
 ```
 
-### Requirements
+## Known limitations and roadmap
 
-- Node.js 20 LTS
-- Corepack
-- Docker Desktop
-- pnpm, used via Corepack
+- Clinical fields (diagnosis, allergies, medications, update notes) are protected by access control and database/disk security but are not encrypted at the column level.
+- Audit log immutability is enforced in application code; a database-level guard (revoked `UPDATE`/`DELETE` or a trigger) is planned.
+- Next.js 14 and Multer 1.x have published advisories that are fixed only in new major versions; upgrading to Next.js 15 and Multer 2 is planned.
+- No key rotation tooling yet for `MASTER_ENCRYPTION_KEY`.
+- No e-mail/SMS notifications for urgent updates.
 
-### First-Time Setup
+## AI-assisted development
 
-```bash
-cd bakim-merkezi
+<!-- TODO(izzet): describe which AI tools you used (e.g. Codex, Claude), at which stages (scaffolding, tests, docs, reviews), and which parts you designed and decided yourself (architecture, security model, permission rules, client requirements). -->
 
-corepack enable
-corepack pnpm install
-corepack pnpm generate:secrets
+The `AGENTS.md` files in the root and in `apps/`, `research/`, `security/`, `tests/` and `src/ui/` are instruction files for AI coding agents: they describe the project rules, security requirements and conventions each agent had to follow. `docs/codex-komutlari.md` lists the prompts used to run them.
 
-docker compose up -d
+## License
 
-corepack pnpm db:generate
-corepack pnpm --filter @bakimevi/api prisma db push
-corepack pnpm db:seed
+<!-- TODO(izzet): choose a license. This is a commercial client project; "All rights reserved" (no license file) is the default until you decide. -->
 
-corepack pnpm dev
-```
+All rights reserved. The source is published for portfolio purposes.
 
-Application addresses:
+## Contact
 
-- Web: `http://localhost:3000`
-- API: `http://localhost:3001`
-- API health check: `http://localhost:3001/health`
-- MinIO console: `http://localhost:9001`
+İzzet Ali Arslan — [GitHub](https://github.com/arslannizzetali)
 
-### Daily Run
-
-Once set up, day-to-day running usually only needs two commands:
-
-```bash
-docker compose up -d
-corepack pnpm dev
-```
-
-The terminal running `corepack pnpm dev` must stay open. Closing it stops the web and API processes.
-
-### Resetting the Local Environment
-
-If the Docker volume or database gets reset, re-apply the schema and seed data:
-
-```bash
-docker compose up -d
-corepack pnpm db:generate
-corepack pnpm --filter @bakimevi/api prisma db push
-corepack pnpm db:seed
-corepack pnpm dev
-```
-
-### Testing and Validation
-
-```bash
-corepack pnpm typecheck
-corepack pnpm test
-corepack pnpm build
-```
-
-For API integration tests:
-
-```bash
-RUN_INTEGRATION=true corepack pnpm --filter @bakimevi/api test
-```
-
-### API Summary
-
-**Auth:** `POST /api/v1/auth/login`, `POST /api/v1/auth/logout`, `POST /api/v1/auth/refresh`, `GET /api/v1/auth/me`
-
-**Patients:** `GET /api/v1/patients`, `POST /api/v1/patients`, `GET /api/v1/patients/:id`, `PATCH /api/v1/patients/:id`, `DELETE /api/v1/patients/:id`, `POST /api/v1/patients/:id/updates`, `GET /api/v1/patients/:id/updates`, `POST /api/v1/patients/:id/documents`, `GET /api/v1/patients/:id/documents`
-
-**Documents:** `GET /api/v1/documents/:id/download`, `PATCH /api/v1/documents/:id/priority`, `DELETE /api/v1/documents/:id`
-
-**Admin:** `GET /api/v1/admin/dashboard-stats`, `GET /api/v1/admin/recent-updates`, `GET /api/v1/admin/audit-logs`, `GET /api/v1/admin/retention-policies`, `PATCH /api/v1/admin/retention-policies`
-
-### Security Notes
-
-- All critical inputs are validated with Zod.
-- Passwords are hashed with bcrypt cost 12.
-- National ID numbers are stored encrypted.
-- Documents are encrypted before being uploaded to MinIO.
-- `RED` documents cannot be deleted at the service level.
-- Critical operations are written to the audit log.
-- Refresh token rotation is applied.
-- Redis-based brute-force login protection is applied.
-- Stack traces are not shown to users in production.
-
-### Development Notes
-
-This project is designed for in-house use. If public deployment, a custom domain, email/SMS integration, or formal compliance with data protection regulations is planned, an additional security and operational review should be carried out.
-
----
-
-<a id="türkçe"></a>
-
-## Türkçe
-
-BakımEvi, yaşlı ve engelli bireylere hizmet veren bakım merkezleri için geliştirilmiş şirket içi hasta takip ve evrak yönetim sistemidir. Uygulama intranet kullanımı için tasarlanmıştır; doğrudan internete açık çalıştırılması önerilmez.
-
-### Canlı Kurulum
-
-Sistem bir bakım merkezinin talebi üzerine tasarlanmıştır.
-
-
-
-
-Sistem iki temel kullanıcı rolüne göre çalışır:
-
-- `ADMIN`: çalışanları, tüm hastaları, tüm güncellemeleri, audit loglarını ve evrak saklama ayarlarını yönetir.
-- `EMPLOYEE`: hasta kaydı oluşturur, hasta arar, hasta güncellemesi girer ve kendi yüklediği evrakları indirir.
-
-### Temel Özellikler
-
-- Hasta kaydı oluşturma ve hasta bilgilerini takip etme
-- Hasta arama, filtreleme ve oda numarasına göre hızlı erişim
-- İlaç, bakım, gözlem, vital bulgu, durum değişikliği ve olay/kaza güncellemeleri
-- Acil hasta güncellemesi işaretleme
-- Hasta ruh hali takibi: iyi, orta, kötü
-- Evrak yükleme, indirme, önceliklendirme ve saklama politikası
-- `RED` evraklar için kod seviyesinde silme koruması
-- Admin paneli, çalışan yönetimi, audit log ve son güncellemeler
-- TC kimlik numarası ve dosya içeriği için AES-256 tabanlı şifreleme
-- JWT access token, refresh token rotation ve Redis tabanlı brute-force koruması
-
-### Sistem Akışı
-
-#### 1. Giriş
-
-Kullanıcı `/login` sayfasından e-posta ve şifre ile giriş yapar. Başarılı girişten sonra rolüne göre dashboard ve menüler gösterilir.
-
-Varsayılan seed kullanıcıları:
-
-| Rol | E-posta | Şifre |
-| --- | --- | --- |
-| Admin | `admin@bakimevi.com` | `ChangeMe-Admin-1!` |
-| Çalışan | `ahmet@bakimevi.com` | `ChangeMe-Employee-1!` |
-| Çalışan | `mehmet@bakimevi.com` | `ChangeMe-Employee-1!` |
-| Çalışan | `fatma@bakimevi.com` | `ChangeMe-Employee-1!` |
-
-#### 2. Hasta Kaydı Oluşturma
-
-Admin ve çalışan rolleri yeni hasta kaydı oluşturabilir.
-
-Uygulamada `/patients/new` sayfasından şu bilgiler girilir:
-
-- Ad ve soyad
-- Doğum tarihi
-- Cinsiyet
-- TC kimlik numarası
-- Oda numarası
-- Bakım türü: yaşlı, engelli veya her ikisi
-- Hareketlilik seviyesi: bağımsız, yardımlı veya yatağa bağımlı
-- Acil iletişim kişisi ve telefonu
-- Alerjiler
-- Süregelen ilaçlar
-
-TC kimlik numarası girilirse API tarafında şifrelenerek saklanır. Hasta kaydı başarılı olunca kullanıcı otomatik olarak hasta detay sayfasına yönlendirilir.
-
-#### 3. Hasta Detay ve Takip
-
-Hasta detay sayfasında hasta bilgileri, acil iletişim, alerjiler, süregelen ilaçlar, hareketlilik durumu, hasta güncellemeleri ve evraklar birlikte görülür.
-
-Hasta detay ekranındaki temel işlemler:
-
-- Yeni hasta güncellemesi ekleme
-- Hasta evrakı yükleme ve yönetme
-- Kritik, yarı önemli ve standart evrakları ayrı listelerde görüntüleme
-- Hastaya ait önceki güncellemeleri zaman sırası ile takip etme
-
-#### 4. Hasta Güncellemesi Girme
-
-`/patients/:id/update` sayfasından hasta için yeni takip kaydı girilir.
-
-Güncelleme türleri:
-
-- İlaç verildi
-- Bakım yapıldı
-- Gözlem
-- Durum değişti
-- Vital bulgular
-- Olay/kaza
-
-Güncelleme formu, seçilen türe göre ek alanlar açar:
-
-- İlaç kaydında ilaç adı, doz ve uygulama yolu girilir.
-- Vital bulgularda tansiyon, nabız ve ateş girilebilir.
-- Bakım kaydında banyo yardımı, beslenme yardımı, fizik tedavi, yara bakımı, psikolojik destek, egzersiz, ilaç hatırlatma ve kıyafet değişimi seçilebilir.
-- Her güncellemede hasta ruh hali ve acil durum işareti tutulur.
-
-#### 5. Evrak Yönetimi
-
-Hasta evrakları `/patients/:id/documents` sayfasından yüklenir. Desteklenen dosya tipleri PDF, JPEG, PNG, WEBP, DOCX ve XLSX formatlarıdır.
-
-Evrak öncelikleri:
-
-| Öncelik | Anlam | Kural |
-| --- | --- | --- |
-| `RED` | Kritik evrak | Hiçbir kullanıcı silemez |
-| `YELLOW` | Yarı önemli evrak | Admin silebilir, varsayılan saklama 90 gün |
-| `GREEN` | Standart evrak | Admin silebilir, varsayılan saklama 30 gün |
-
-Dosyalar MinIO'ya yüklenmeden önce AES-256-GCM ile şifrelenir. Veritabanında orijinal dosya, plain-text TC veya plain-text dosya anahtarı tutulmaz.
-
-#### 6. Admin Paneli
-
-Admin rolü şu alanlara erişir:
-
-- Çalışan listesi ve yeni çalışan oluşturma
-- Tüm hasta kayıtlarını filtreleme
-- Tüm hasta güncellemelerini görüntüleme
-- Son güncellemeler ve acil güncellemeler paneli
-- Audit log kayıtları
-- Evrak saklama politikası ayarları
-
-### Yetki Matrisi
-
-| İşlem | Admin | Çalışan |
-| --- | --- | --- |
-| Çalışan oluşturma, silme, listeleme | Var | Yok |
-| Tüm audit logları görme | Var | Yok |
-| Tüm hasta güncellemelerini görme | Var | Yok |
-| Hasta oluşturma ve görüntüleme | Var | Var |
-| Hasta güncellemesi girme | Var | Var |
-| Kendi güncellemelerini görme | Var | Var |
-| Evrak yükleme | Var | Var |
-| Kendi yüklediği evrakı indirme | Var | Var |
-| Başka çalışanın evrakını indirme | Var | Yok |
-| `RED` evrak silme | Yok | Yok |
-| `YELLOW` ve `GREEN` evrak silme | Var | Yok |
-| Retention policy ayarları | Var | Yok |
-
-### Teknoloji Stack
-
-Frontend:
-
-- Next.js 14 App Router
-- React 18
-- TypeScript 5
-- Tailwind CSS
-- TanStack Query
-- Zustand
-- React Hook Form ve Zod
-- Lucide React
-
-Backend:
-
-- Node.js 20
-- Express
-- TypeScript
-- Prisma
-- PostgreSQL 16
-- Redis 7
-- Bull queue
-- MinIO
-- bcrypt
-- jsonwebtoken
-- Node.js crypto
-
-Monorepo:
-
-- pnpm workspace
-- Turbo
-
-### Proje Yapısı
-
-```text
-bakim-merkezi/
-├── apps/
-│   ├── web/                 # Next.js web arayüzü
-│   └── api/                 # Express API ve Prisma
-├── packages/
-│   ├── shared-types/        # Paylaşılan TypeScript tipleri
-│   └── validation/          # Zod validasyon şemaları
-├── docs/                    # Proje dokümantasyonu
-├── tests/                   # Test yönlendirmeleri ve ajan notları
-├── security/                # Güvenlik notları
-├── research/                # Araştırma ve karar notları
-├── docker-compose.yml       # PostgreSQL, Redis ve MinIO
-└── package.json             # Monorepo komutları
-```
-
-### Gereksinimler
-
-- Node.js 20 LTS
-- Corepack
-- Docker Desktop
-- pnpm, Corepack üzerinden kullanılır
-
-### İlk Kurulum
-
-Projeyi ilk kez çalıştırırken:
-
-```bash
-cd bakim-merkezi
-
-corepack enable
-corepack pnpm install
-corepack pnpm generate:secrets
-
-docker compose up -d
-
-corepack pnpm db:generate
-corepack pnpm --filter @bakimevi/api prisma db push
-corepack pnpm db:seed
-
-corepack pnpm dev
-```
-
-Uygulama adresleri:
-
-- Web: `http://localhost:3000`
-- API: `http://localhost:3001`
-- API health check: `http://localhost:3001/health`
-- MinIO console: `http://localhost:9001`
-
-### Günlük Çalıştırma
-
-Kurulum tamamlandıysa günlük çalıştırma için genellikle iki komut yeterlidir:
-
-```bash
-docker compose up -d
-corepack pnpm dev
-```
-
-`corepack pnpm dev` çalışan terminal açık kalmalıdır. Terminal kapatılırsa web ve API süreçleri de kapanır.
-
-### Lokal Ortamı Sıfırlama
-
-Docker volume veya veritabanı sıfırlandıysa tekrar şema ve seed verisi basmak için:
-
-```bash
-docker compose up -d
-corepack pnpm db:generate
-corepack pnpm --filter @bakimevi/api prisma db push
-corepack pnpm db:seed
-corepack pnpm dev
-```
-
-### Test ve Doğrulama
-
-```bash
-corepack pnpm typecheck
-corepack pnpm test
-corepack pnpm build
-```
-
-API entegrasyon testleri için:
-
-```bash
-RUN_INTEGRATION=true corepack pnpm --filter @bakimevi/api test
-```
-
-### API Özeti
-
-Auth:
-
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/logout`
-- `POST /api/v1/auth/refresh`
-- `GET /api/v1/auth/me`
-
-Hasta:
-
-- `GET /api/v1/patients`
-- `POST /api/v1/patients`
-- `GET /api/v1/patients/:id`
-- `PATCH /api/v1/patients/:id`
-- `DELETE /api/v1/patients/:id`
-- `POST /api/v1/patients/:id/updates`
-- `GET /api/v1/patients/:id/updates`
-- `POST /api/v1/patients/:id/documents`
-- `GET /api/v1/patients/:id/documents`
-
-Evrak:
-
-- `GET /api/v1/documents/:id/download`
-- `PATCH /api/v1/documents/:id/priority`
-- `DELETE /api/v1/documents/:id`
-
-Admin:
-
-- `GET /api/v1/admin/dashboard-stats`
-- `GET /api/v1/admin/recent-updates`
-- `GET /api/v1/admin/audit-logs`
-- `GET /api/v1/admin/retention-policies`
-- `PATCH /api/v1/admin/retention-policies`
-
-### Güvenlik Notları
-
-- Tüm kritik girdiler Zod ile doğrulanır.
-- Şifreler bcrypt cost 12 ile hashlenir.
-- TC kimlik numarası şifreli saklanır.
-- Evraklar MinIO'ya şifrelenerek yüklenir.
-- `RED` evraklar servis seviyesinde silinemez.
-- Kritik işlemler audit log'a yazılır.
-- Refresh token rotation uygulanır.
-- Redis üzerinden brute-force giriş koruması uygulanır.
-- Production ortamında stack trace kullanıcıya gösterilmez.
-
-### Geliştirme Notları
-
-Bu proje şirket içi kullanım senaryosu için tasarlanmıştır. Public deployment, domain, e-posta/SMS entegrasyonu veya KVKK kapsamlı resmi uyum süreci planlanıyorsa ayrıca güvenlik ve operasyonel gözden geçirme yapılmalıdır.
+<!-- TODO(izzet): add LinkedIn / e-mail if you want them public. -->
