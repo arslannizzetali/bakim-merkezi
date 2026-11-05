@@ -14,8 +14,9 @@ export class NotificationService {
       .filter(Boolean)
       .join("\n");
 
-    if (!env.RESEND_API_KEY) {
-      console.log(`[demo-request] RESEND_API_KEY tanımlı değil, e-posta gönderilmedi.\n${subject}\n${body}`);
+    if (!env.RESEND_API_KEY || !env.NOTIFY_EMAIL) {
+      // Contact details are personal data, so only the subject is logged.
+      console.log(`[demo-request] RESEND_API_KEY or NOTIFY_EMAIL not set, e-mail not sent: ${subject}`);
       return;
     }
 

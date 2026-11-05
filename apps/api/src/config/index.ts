@@ -2,7 +2,12 @@ import dotenv from "dotenv";
 import { z } from "zod";
 
 dotenv.config({ path: process.env.NODE_ENV === "test" ? ".env.test" : ".env" });
-dotenv.config({ path: ".env.example" });
+// .env.example only fills gaps during local development. In production every
+// value must be set explicitly so a missing variable fails fast instead of
+// silently falling back to a public example value.
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config({ path: ".env.example" });
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -34,7 +39,7 @@ const envSchema = z.object({
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().default(5),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM_EMAIL: z.string().default("onboarding@resend.dev"),
-  NOTIFY_EMAIL: z.string().email().default("owner@example.com")
+  NOTIFY_EMAIL: z.string().email().optional()
 });
 
 const parsed = envSchema.safeParse(process.env);
