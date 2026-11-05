@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Info, Plus, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { patientApi } from "@/lib/api/patient.api";
+import { useAuthStore } from "@/lib/store/auth.store";
 import { formatDateTime } from "@/lib/locale";
 import { UpdateCard } from "@/components/patients/update-card";
 import { DocumentList } from "@/components/documents/document-list";
@@ -27,6 +28,7 @@ export default function PatientDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
   const patientQuery = useQuery({
     queryKey: ["patient", params.id],
     queryFn: () => patientApi.get(params.id)
@@ -96,14 +98,16 @@ export default function PatientDetailPage() {
                 </option>
               ))}
             </select>
-            <button
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-              className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-danger hover:bg-red-50"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Hastayı Sil
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-danger hover:bg-red-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Hastayı Sil
+              </button>
+            )}
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

@@ -12,6 +12,7 @@ import { documentController } from "../controllers/document.controller.js";
 import { patientController } from "../controllers/patient.controller.js";
 import { patientUpdateController } from "../controllers/patient-update.controller.js";
 import { authenticate } from "../middleware/authenticate.js";
+import { requireAdmin } from "../middleware/authorize.js";
 import { uploadSingleDocument, verifyUploadedFile } from "../middleware/file-upload.js";
 import { validate } from "../middleware/validate.js";
 
@@ -22,7 +23,7 @@ patientRoutes.get("/", validate({ query: patientQuerySchema }), patientControlle
 patientRoutes.post("/", validate({ body: createPatientSchema }), patientController.create);
 patientRoutes.get("/:id", validate({ params: patientIdParamSchema }), patientController.get);
 patientRoutes.patch("/:id", validate({ params: patientIdParamSchema, body: updatePatientSchema }), patientController.update);
-patientRoutes.delete("/:id", validate({ params: patientIdParamSchema }), patientController.delete);
+patientRoutes.delete("/:id", requireAdmin, validate({ params: patientIdParamSchema }), patientController.delete);
 
 patientRoutes.post(
   "/:id/updates",
