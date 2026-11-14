@@ -72,6 +72,10 @@ RUN_INTEGRATION=true corepack pnpm --filter @bakimevi/api test   # seed'lenmiş 
 - Next.js 14 ve Multer 1.x'teki bazı güvenlik açıkları yalnızca yeni ana sürümlerde düzeltildi; Next.js 15 ve Multer 2'ye geçiş planlanıyor.
 - `MASTER_ENCRYPTION_KEY` için anahtar rotasyonu aracı henüz yok.
 
+## Geliştirme geçmişi
+
+Proje önce yerelde geliştirildi, bu repoya sonradan toplu olarak aktarıldı; commit geçmişinin kısa olmasının nedeni budur. Şifreleme tasarımı [`docs/ENCRYPTION.md`](docs/ENCRYPTION.md) dosyasında anlatılır.
+
 ## Yapay zekâ destekli geliştirme
 
 <!-- TODO(izzet): hangi AI araçlarını, hangi aşamalarda kullandığını ve neleri kendin tasarladığını yaz. -->
