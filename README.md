@@ -67,7 +67,7 @@ Every row is covered by an integration test in [`tests/integration/permission-ma
 - **Audit log** records logins, failed logins, patient views/searches/changes and document actions. The application never updates or deletes audit entries.
 - **Hardening** — Helmet security headers and CSP, CORS restricted to configured origins, Zod validation on every input, bcrypt (cost 12) password hashing, startup fails in production if secrets are missing or default MinIO credentials are used.
 
-Details: [`docs/DATA_PROTECTION.md`](docs/DATA_PROTECTION.md).
+Details: [`docs/ENCRYPTION.md`](docs/ENCRYPTION.md) (key hierarchy, envelope encryption, known gaps) and [`docs/DATA_PROTECTION.md`](docs/DATA_PROTECTION.md).
 
 ## Tech stack
 
@@ -161,6 +161,10 @@ bakim-merkezi/
 - Next.js 14 and Multer 1.x have published advisories that are fixed only in new major versions; upgrading to Next.js 15 and Multer 2 is planned.
 - No key rotation tooling yet for `MASTER_ENCRYPTION_KEY`.
 - No e-mail/SMS notifications for urgent updates.
+
+## Development history
+
+The project was first developed locally and imported into this repository later in bulk, which is why the commit history is short.
 
 ## AI-assisted development
 
