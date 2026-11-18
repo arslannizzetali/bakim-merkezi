@@ -14,6 +14,31 @@ BakımEvi bakım personeline günlük hasta güncellemelerini girip evrakları s
 Proje bir bakım merkezinin talebi ve ihtiyaçları üzerine tasarlanıp geliştirilmiştir. Bu herkese açık depo yalnızca uygulama kodunu ve tamamen sahte demo verisini içerir; gerçek bir kuruma, hastaya veya personele ait hiçbir bilgi barındırmaz.
 
 
+## Ekran görüntüleri
+
+_Tüm görüntüler `pnpm db:seed` ile yüklenen sahte demo verisiyle alınmıştır; gerçek hasta veya personel bilgisi içermez._
+
+![Yönetici paneli](docs/screenshots/02-dashboard.png)
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/04-hasta-detay.png" alt="Önceliklendirilmiş evraklarla hasta detayı"></td>
+    <td><img src="docs/screenshots/03-hastalar.png" alt="Hasta listesi ve filtreler"></td>
+  </tr>
+  <tr>
+    <td align="center">Önceliklendirilmiş evraklarla hasta detayı</td>
+    <td align="center">Hasta listesi ve filtreler</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/05-guncelleme-formu.png" alt="Günlük güncelleme formu"></td>
+    <td align="center"><img src="docs/screenshots/09-mobil-dashboard.png" alt="Mobil görünüm" width="45%"></td>
+  </tr>
+  <tr>
+    <td align="center">Günlük güncelleme formu</td>
+    <td align="center">Mobil görünüm</td>
+  </tr>
+</table>
+
 ## Özellikler
 
 - **Hasta kayıtları** — kayıt, arama ve filtreleme (durum, bakım türü, mobilite, giriş tarihi), oda numarasıyla hızlı erişim

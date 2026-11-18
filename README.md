@@ -21,6 +21,31 @@ BakımEvi gives care staff one place to record daily patient updates and store d
 The project was designed and built in response to the requirements of a care facility. This public repository contains only the application code and fully synthetic demo data; it holds no information about any real facility, resident or staff member.
 
 
+## Screenshots
+
+_All screenshots use the synthetic demo data from `pnpm db:seed`; no real residents or staff are shown._
+
+![Admin dashboard](docs/screenshots/02-dashboard.png)
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/04-hasta-detay.png" alt="Patient detail with prioritized documents"></td>
+    <td><img src="docs/screenshots/03-hastalar.png" alt="Patient list and filters"></td>
+  </tr>
+  <tr>
+    <td align="center">Patient detail with prioritized documents</td>
+    <td align="center">Patient list and filters</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/05-guncelleme-formu.png" alt="Daily update form"></td>
+    <td align="center"><img src="docs/screenshots/09-mobil-dashboard.png" alt="Mobile layout" width="45%"></td>
+  </tr>
+  <tr>
+    <td align="center">Daily update form</td>
+    <td align="center">Mobile layout</td>
+  </tr>
+</table>
+
 ## Features
 
 - **Patient records** — registration, search and filters (status, care type, mobility, admission date), quick access by room number
