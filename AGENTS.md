@@ -11,7 +11,7 @@
 **Mimari:** Monorepo (Next.js 14 App Router + Node.js/Express API + PostgreSQL)
 **Dil:** TypeScript strict mode (zorunlu)
 **Paket Yöneticisi:** pnpm workspace
-**Runtime:** Node.js 20 LTS
+**Runtime:** Node.js 22 LTS
 
 ---
 
@@ -214,7 +214,7 @@ shadcn/ui, React Hook Form 7, Zod 3, TanStack Query 5,
 Zustand 4, date-fns 3 (tr locale), Recharts 2, Lucide React, Sonner
 
 ### Backend
-Node.js 20, Express 4, TypeScript 5, Prisma 5,
+Node.js 22, Express 4, TypeScript 5, Prisma 5,
 PostgreSQL 16, Redis 7, Bull 4, Multer, bcrypt,
 jsonwebtoken, MinIO SDK, Node crypto (built-in)
 

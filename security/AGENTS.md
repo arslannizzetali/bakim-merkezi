@@ -87,8 +87,8 @@ export class TokenService {
       process.env.JWT_SECRET!,
       {
         expiresIn: '15m',
-        issuer: 'bakimpro-api',
-        audience: 'bakimpro-web',
+        issuer: 'bakimevi-api',
+        audience: 'bakimevi-web',
         algorithm: 'HS256',  // Production'da RS256 tercih et
       }
     );
@@ -104,7 +104,7 @@ export class TokenService {
       process.env.JWT_REFRESH_SECRET!,
       {
         expiresIn: '7d',
-        issuer: 'bakimpro-api',
+        issuer: 'bakimevi-api',
         algorithm: 'HS256',
       }
     );
