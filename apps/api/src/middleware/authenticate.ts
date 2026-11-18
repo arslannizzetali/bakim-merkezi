@@ -4,13 +4,18 @@ import type { JwtPayload } from "jsonwebtoken";
 import { env } from "../config/index.js";
 import { prisma } from "../config/database.js";
 import { redis } from "../config/redis.js";
-import { UnauthorizedError } from "../utils/errors.js";
+import { assertIssuedAfterRevocation } from "../services/auth.service.js";
+import { ForbiddenError, UnauthorizedError } from "../utils/errors.js";
+
+/** Routes a user who must change their password can still call. */
+const PASSWORD_CHANGE_ALLOWED = new Set(["/api/v1/auth/me", "/api/v1/auth/logout", "/api/v1/auth/change-password"]);
 
 interface AccessTokenPayload extends JwtPayload {
   sub: string;
   email: string;
   role: "ADMIN" | "EMPLOYEE";
   jti: string;
+  iatMs?: number;
 }
 
 export async function authenticate(req: Request, _res: Response, next: NextFunction): Promise<void> {
@@ -35,13 +40,19 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
       throw new UnauthorizedError("TOKEN_REVOKED", "Oturum sonlandırılmış");
     }
 
+    await assertIssuedAfterRevocation(payload.sub, payload);
+
     const user = await prisma.user.findFirst({
       where: { id: payload.sub, deletedAt: null, isActive: true },
-      select: { id: true, email: true, firstName: true, lastName: true, role: true }
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, mustChangePassword: true }
     });
 
     if (!user) {
       throw new UnauthorizedError("USER_INACTIVE", "Kullanıcı aktif değil");
+    }
+
+    if (user.mustChangePassword && !PASSWORD_CHANGE_ALLOWED.has(`${req.baseUrl}${req.path}`)) {
+      throw new ForbiddenError("PASSWORD_CHANGE_REQUIRED", "Devam etmeden önce şifrenizi değiştirmelisiniz");
     }
 
     req.user = {
@@ -52,7 +63,7 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
 
     next();
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
+    if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
       next(error);
       return;
     }

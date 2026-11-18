@@ -33,6 +33,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Şifre zorunludur")
 });
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Mevcut şifre zorunludur"),
+    newPassword: z
+      .string()
+      .min(12, "Yeni şifre en az 12 karakter olmalıdır")
+      .max(128, "Yeni şifre en fazla 128 karakter olabilir")
+      .regex(/[a-zçğıöşü]/, "Yeni şifre en az bir küçük harf içermelidir")
+      .regex(/[A-ZÇĞİÖŞÜ]/, "Yeni şifre en az bir büyük harf içermelidir")
+      .regex(/\d/, "Yeni şifre en az bir rakam içermelidir")
+  })
+  .refine((value) => value.currentPassword !== value.newPassword, {
+    message: "Yeni şifre mevcut şifreden farklı olmalıdır",
+    path: ["newPassword"]
+  });
+
 export const demoRequestSchema = z.object({
   institutionName: z
     .string()

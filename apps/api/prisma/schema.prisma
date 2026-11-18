@@ -59,6 +59,8 @@ model User {
   lastName        String          @map("last_name") @db.VarChar(50)
   role            Role            @default(EMPLOYEE)
   isActive        Boolean         @default(true) @map("is_active")
+  /// Set when an admin assigns a password; the user must pick their own on next login.
+  mustChangePassword Boolean      @default(false) @map("must_change_password")
   createdById     String?         @map("created_by_id")
   createdBy       User?           @relation("CreatedByUser", fields: [createdById], references: [id])
   createdUsers    User[]          @relation("CreatedByUser")

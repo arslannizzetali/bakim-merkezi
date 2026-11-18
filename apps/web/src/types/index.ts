@@ -15,6 +15,7 @@ export interface User {
   lastName: string;
   role: Role;
   isActive?: boolean;
+  mustChangePassword?: boolean;
 }
 
 export interface Patient {

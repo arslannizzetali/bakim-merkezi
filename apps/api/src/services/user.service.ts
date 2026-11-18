@@ -63,6 +63,8 @@ export class UserService {
         lastName: input.lastName,
         role: input.role as Role,
         isActive: input.isActive,
+        // The admin chose this password, so the employee must replace it.
+        mustChangePassword: true,
         createdById: requester.userId
       },
       select: publicUserSelect
@@ -101,6 +103,8 @@ export class UserService {
       data: omitUndefined({
         email: input.email,
         passwordHash,
+        // A password reset by an admin must be replaced by the user on next login.
+        mustChangePassword: passwordHash && id !== requester.userId ? true : undefined,
         firstName: input.firstName,
         lastName: input.lastName,
         role: input.role as Role | undefined,
@@ -156,6 +160,7 @@ const publicUserSelect = {
   lastName: true,
   role: true,
   isActive: true,
+  mustChangePassword: true,
   lastLoginAt: true,
   createdAt: true,
   updatedAt: true

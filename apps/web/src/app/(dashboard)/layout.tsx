@@ -26,12 +26,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
+    if (user?.mustChangePassword) {
+      router.replace("/change-password");
+      return;
+    }
+
     if (pathname.startsWith("/admin") && user?.role !== "ADMIN") {
       router.replace("/dashboard");
     }
-  }, [isAuthenticated, isSessionReady, pathname, router, user?.role]);
+  }, [isAuthenticated, isSessionReady, pathname, router, user?.role, user?.mustChangePassword]);
 
-  if (!isSessionReady || !isAuthenticated) {
+  if (!isSessionReady || !isAuthenticated || user?.mustChangePassword) {
     return null;
   }
 

@@ -57,6 +57,22 @@ export class AuthController {
     }
   };
 
+  changePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user) {
+        throw new UnauthorizedError();
+      }
+      const result = await authService.changePassword(req.user.id, req.body.currentPassword, req.body.newPassword, {
+        ipAddress: getClientIp(req),
+        userAgent: req.header("user-agent")
+      });
+      this.setRefreshCookie(res, result.tokens.refreshToken);
+      ok(res, { user: result.user, accessToken: result.tokens.accessToken });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   me = (req: Request, res: Response, next: NextFunction): void => {
     try {
       if (!req.user) {
@@ -67,7 +83,8 @@ export class AuthController {
         email: req.user.email,
         firstName: req.user.firstName,
         lastName: req.user.lastName,
-        role: req.user.role
+        role: req.user.role,
+        mustChangePassword: req.user.mustChangePassword
       });
     } catch (error) {
       next(error);
