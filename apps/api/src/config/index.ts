@@ -11,7 +11,11 @@ if (process.env.NODE_ENV !== "production") {
 
 const envSchema = z
   .object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    // No default: a missing NODE_ENV must fail fast instead of silently running
+    // a server in development mode (stack traces in responses, non-secure cookies).
+    NODE_ENV: z.enum(["development", "test", "production"], {
+      errorMap: () => ({ message: "NODE_ENV development, test veya production olarak tanımlanmalıdır" })
+    }),
     DATABASE_URL: z.string().url(),
     TEST_DATABASE_URL: z.string().url().optional(),
     REDIS_URL: z.string().url(),

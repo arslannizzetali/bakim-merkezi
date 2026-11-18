@@ -1,18 +1,18 @@
 import cors from "cors";
 import helmet from "helmet";
-import { allowedOrigins, env } from "../config/index.js";
+import { allowedOrigins } from "../config/index.js";
 
 export const securityMiddleware = [
   helmet({
+    // The API only serves JSON and file downloads, so it needs no scripts,
+    // styles or frames at all.
     contentSecurityPolicy: {
+      useDefaults: false,
       directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'", env.API_URL],
-        frameSrc: ["'none'"],
-        objectSrc: ["'none'"]
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'none'"],
+        formAction: ["'none'"]
       }
     },
     hsts: {
