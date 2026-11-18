@@ -1,3 +1,5 @@
+# Local development services. Ports are bound to 127.0.0.1 so the throwaway
+# credentials below are never reachable from the network.
 services:
   postgres:
     image: postgres:16-alpine
@@ -8,7 +10,7 @@ services:
       POSTGRES_PASSWORD: bakim_pass
       POSTGRES_DB: bakim_db
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -27,7 +29,7 @@ services:
       POSTGRES_PASSWORD: bakim_pass
       POSTGRES_DB: bakim_test
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
@@ -43,7 +45,7 @@ services:
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -54,20 +56,22 @@ services:
       start_period: 5s
 
   minio:
-    image: minio/minio:latest
+    # minio/minio is no longer published on Docker Hub; this pinned Bitnami
+    # build starts the server and the console (:9001) on its own.
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
     container_name: bakimevi-minio
     restart: unless-stopped
-    command: ["server", "/data", "--console-address", ":9001"]
     environment:
+      # Local development only. Production rejects these values at startup.
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
-      - minio_data:/data
+      - minio_data:/bitnami/minio/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 5s
       retries: 5
