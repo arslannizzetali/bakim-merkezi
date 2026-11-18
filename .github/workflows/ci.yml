@@ -88,6 +88,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bakimevi/api exec prisma generate
       - name: Apply migrations
         run: pnpm --filter @bakimevi/api exec prisma migrate deploy
       - name: Check migrations match schema.prisma
