@@ -7,8 +7,8 @@ import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { prisma } from "../../apps/api/src/config/database.js";
 
-const ADMIN = { email: "admin@bakimevi.com", password: process.env.SEED_ADMIN_PASSWORD ?? "" };
-const EMPLOYEE = { email: "ahmet@bakimevi.com", password: process.env.SEED_EMPLOYEE_PASSWORD ?? "" };
+const ADMIN = { email: "admin@demo.example", password: process.env.SEED_ADMIN_PASSWORD ?? "" };
+const EMPLOYEE = { email: "ahmet@demo.example", password: process.env.SEED_EMPLOYEE_PASSWORD ?? "" };
 
 const runIntegration = process.env.RUN_INTEGRATION === "true";
 const describeIntegration = runIntegration ? describe : describe.skip;
@@ -24,7 +24,7 @@ describeIntegration("permission matrix", () => {
     const { ensureRedisConnected, redis } = await import("../../apps/api/src/config/redis.js");
     await ensureRedisConnected();
     // Start from a clean rate-limit / lockout state.
-    const keys = await redis.keys("auth:*");
+    const keys = [...(await redis.keys("auth:*")), ...(await redis.keys("rl:auth:*"))];
     if (keys.length > 0) await redis.del(...keys);
 
     const { createApp } = await import("../../apps/api/src/app.js");
@@ -171,7 +171,7 @@ describeIntegration("permission matrix", () => {
         const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: "mehmet@bakimevi.com", password: "wrong-password" })
+          body: JSON.stringify({ email: "mehmet@demo.example", password: "wrong-password" })
         });
         statuses.push(response.status);
       }
@@ -182,7 +182,7 @@ describeIntegration("permission matrix", () => {
       const locked = await fetch(`${baseUrl}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "mehmet@bakimevi.com", password: EMPLOYEE.password })
+        body: JSON.stringify({ email: "mehmet@demo.example", password: EMPLOYEE.password })
       });
       expect(locked.status).not.toBe(200);
     });

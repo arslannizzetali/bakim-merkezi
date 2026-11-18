@@ -1,3 +1,8 @@
+// Development / demo seed. EVERY value below is synthetic: names are invented,
+// e-mails use the reserved `.example` domain, TC numbers (`1000000000x`) are
+// placeholders that do not pass TC checksum validation, and documents are
+// generated in memory. Never add real resident or staff data here.
+// Production facilities are bootstrapped with `seed-tenant.ts` instead.
 import bcrypt from "bcrypt";
 import { randomUUID } from "node:crypto";
 import type {
@@ -21,28 +26,28 @@ const employeePassword = resolveSeedPassword("SEED_EMPLOYEE_PASSWORD");
 
 const users = [
   {
-    email: "admin@bakimevi.com",
+    email: "admin@demo.example",
     password: adminPassword.password,
     role: "ADMIN",
     firstName: "Admin",
     lastName: "Yönetici"
   },
   {
-    email: "ahmet@bakimevi.com",
+    email: "ahmet@demo.example",
     password: employeePassword.password,
     role: "EMPLOYEE",
     firstName: "Ahmet",
     lastName: "Demir"
   },
   {
-    email: "mehmet@bakimevi.com",
+    email: "mehmet@demo.example",
     password: employeePassword.password,
     role: "EMPLOYEE",
     firstName: "Mehmet",
     lastName: "Kaya"
   },
   {
-    email: "fatma@bakimevi.com",
+    email: "fatma@demo.example",
     password: employeePassword.password,
     role: "EMPLOYEE",
     firstName: "Fatma",
