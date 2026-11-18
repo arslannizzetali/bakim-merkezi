@@ -26,7 +26,9 @@ async function main(): Promise<void> {
       firstName,
       lastName,
       role: "ADMIN",
-      isActive: true
+      isActive: true,
+      // The generated bootstrap password is shown once in a terminal; force a change.
+      mustChangePassword: true
     }
   });
 

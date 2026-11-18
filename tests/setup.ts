@@ -21,5 +21,7 @@ process.env.FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:3000";
 process.env.API_URL = process.env.API_URL ?? "http://localhost:3001";
 process.env.ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ?? "http://localhost:3000";
 process.env.RATE_LIMIT_WINDOW_MS = process.env.RATE_LIMIT_WINDOW_MS ?? "900000";
-process.env.RATE_LIMIT_MAX = process.env.RATE_LIMIT_MAX ?? "100";
+// High enough that the general API limiter never trips during a full test run;
+// the auth limiter below is what the lockout tests exercise.
+process.env.RATE_LIMIT_MAX = process.env.RATE_LIMIT_MAX ?? "10000";
 process.env.AUTH_RATE_LIMIT_MAX = process.env.AUTH_RATE_LIMIT_MAX ?? "5";

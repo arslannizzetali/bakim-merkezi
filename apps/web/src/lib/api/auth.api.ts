@@ -10,6 +10,8 @@ export interface LoginResponse {
 
 export const authApi = {
   login: (email: string, password: string) => api.post<LoginResponse>("/auth/login", { email, password }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<LoginResponse>("/auth/change-password", { currentPassword, newPassword }),
   me: () => api.get<User>("/auth/me"),
   refresh: () => api.post<{ accessToken: string }>("/auth/refresh"),
   logout: () => api.post<void>("/auth/logout")

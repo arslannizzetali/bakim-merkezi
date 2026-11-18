@@ -45,6 +45,8 @@ describe("EncryptionService", () => {
     const legacy = JSON.stringify({ data: data.toString("hex"), authTag: cipher.getAuthTag().toString("hex") });
 
     expect(service.decryptTc(legacy)).toBe("10000000001");
+    expect(service.isLegacyTc(legacy)).toBe(true);
+    expect(service.isLegacyTc(service.encryptTc("10000000001"))).toBe(false);
   });
 
   it("rejects a tampered TC ciphertext", () => {

@@ -18,9 +18,46 @@ interface RefreshPayload extends JwtPayload {
   sub: string;
   tokenFamily: string;
   jti: string;
+  iatMs?: number;
 }
 
 type JwtExpiresIn = NonNullable<SignOptions["expiresIn"]>;
+
+/** Failed logins for one account, from any IP, before the account is locked. */
+const ACCOUNT_LOCK_MULTIPLIER = 4;
+const LOCK_SECONDS = 15 * 60;
+
+// Compared against when the e-mail is unknown, so a missing account costs the
+// same bcrypt time as a wrong password and response timing does not reveal it.
+let dummyHashPromise: Promise<string> | undefined;
+function dummyHash(): Promise<string> {
+  dummyHashPromise ??= bcrypt.hash(randomUUID(), 12);
+  return dummyHashPromise;
+}
+
+/** Redis key holding the time (epoch ms) before which a user's tokens are invalid. */
+export function tokensValidAfterKey(userId: string): string {
+  return `auth:tokens-valid-after:${userId}`;
+}
+
+/**
+ * Throws when the token was issued before the user's revocation cutoff (set on
+ * password change). `iatMs` is our own millisecond claim; older tokens without
+ * it fall back to the standard one-second `iat`.
+ */
+export async function assertIssuedAfterRevocation(
+  userId: string,
+  payload: { iat?: number | undefined; iatMs?: unknown }
+): Promise<void> {
+  const validAfter = Number(await redis.get(tokensValidAfterKey(userId)));
+  if (!validAfter) {
+    return;
+  }
+  const issuedAtMs = typeof payload.iatMs === "number" ? payload.iatMs : (payload.iat ?? 0) * 1000;
+  if (issuedAtMs < validAfter) {
+    throw new UnauthorizedError("TOKEN_REVOKED", "Oturum sonlandırılmış, lütfen tekrar giriş yapın");
+  }
+}
 
 export interface LoginContext {
   ipAddress: string;
@@ -50,11 +87,13 @@ export class AuthService {
         firstName: true,
         lastName: true,
         role: true,
-        isActive: true
+        isActive: true,
+        mustChangePassword: true
       }
     });
 
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    const passwordMatches = await bcrypt.compare(password, user?.passwordHash ?? (await dummyHash()));
+    if (!user || !passwordMatches) {
       await this.recordFailedLogin(email, context);
       throw new UnauthorizedError("INVALID_CREDENTIALS", "E-posta veya şifre hatalı");
     }
@@ -72,7 +111,7 @@ export class AuthService {
       throw new ForbiddenError("USER_INACTIVE", "Hesabınız devre dışı. Yöneticinizle iletişime geçin.");
     }
 
-    await redis.del(this.failedKey(email, context.ipAddress));
+    await redis.del(this.failedKey(email, context.ipAddress), this.accountFailedKey(email));
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -99,12 +138,15 @@ export class AuthService {
 
   async refresh(refreshToken: string, context: LoginContext): Promise<TokenPair> {
     const payload = this.verifyRefreshToken(refreshToken);
+    await assertIssuedAfterRevocation(payload.sub, payload);
     const familyRevoked = await redis.get(this.revokedFamilyKey(payload.tokenFamily));
     if (familyRevoked) {
       throw new UnauthorizedError("TOKEN_REUSE_DETECTED", "Tüm oturumlar sonlandırıldı");
     }
 
-    const activeToken = await redis.get(this.refreshTokenKey(payload.jti));
+    // GETDEL is atomic: two concurrent requests with the same refresh token
+    // cannot both succeed, so the second one is treated as reuse.
+    const activeToken = await redis.getdel(this.refreshTokenKey(payload.jti));
     if (!activeToken) {
       await redis.set(this.revokedFamilyKey(payload.tokenFamily), "1", "EX", this.refreshTtlSeconds());
       await auditService.write({
@@ -119,8 +161,6 @@ export class AuthService {
       throw new UnauthorizedError("TOKEN_REUSE_DETECTED", "Tüm oturumlar sonlandırıldı");
     }
 
-    await redis.del(this.refreshTokenKey(payload.jti));
-
     const user = await prisma.user.findFirst({
       where: { id: payload.sub, deletedAt: null, isActive: true },
       select: { id: true, email: true, firstName: true, lastName: true, role: true }
@@ -131,6 +171,44 @@ export class AuthService {
     }
 
     return this.generateTokenPair(user, payload.tokenFamily);
+  }
+
+  /**
+   * Replaces the user's password, clears the forced-change flag and revokes
+   * every token issued before now (other devices must log in again).
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    context: LoginContext
+  ): Promise<{ user: PublicUser; tokens: TokenPair }> {
+    const user = await prisma.user.findFirst({
+      where: { id: userId, deletedAt: null, isActive: true },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, passwordHash: true }
+    });
+    if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      throw new UnauthorizedError("INVALID_CURRENT_PASSWORD", "Mevcut şifre hatalı");
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await bcrypt.hash(newPassword, 12), mustChangePassword: false },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, mustChangePassword: true }
+    });
+
+    await redis.set(tokensValidAfterKey(user.id), String(Date.now()), "EX", this.refreshTtlSeconds());
+
+    await auditService.write({
+      userId: user.id,
+      action: "USER_PASSWORD_CHANGED",
+      resourceType: "User",
+      resourceId: user.id,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent
+    });
+
+    return { user: toPublicUser(updated), tokens: await this.generateTokenPair(updated) };
   }
 
   async logout(user: LogoutUser | undefined, refreshToken: string | undefined, context: LoginContext): Promise<void> {
@@ -166,10 +244,12 @@ export class AuthService {
   ): Promise<TokenPair> {
     const accessJti = randomUUID();
     const refreshJti = randomUUID();
+    const iatMs = Date.now();
     const refreshPayload: RefreshPayload = {
       sub: user.id,
       tokenFamily,
-      jti: refreshJti
+      jti: refreshJti,
+      iatMs
     };
 
     const signOptions: SignOptions = {
@@ -184,7 +264,8 @@ export class AuthService {
         sub: user.id,
         email: user.email,
         role: user.role,
-        jti: accessJti
+        jti: accessJti,
+        iatMs
       },
       env.JWT_SECRET,
       signOptions
@@ -222,8 +303,11 @@ export class AuthService {
   }
 
   private async assertNotBanned(email: string, ipAddress: string): Promise<void> {
-    const banned = await redis.get(this.banKey(email, ipAddress));
-    if (banned) {
+    const [ipBanned, accountBanned] = await Promise.all([
+      redis.get(this.banKey(email, ipAddress)),
+      redis.get(this.accountBanKey(email))
+    ]);
+    if (ipBanned || accountBanned) {
       throw new ForbiddenError("TOO_MANY_ATTEMPTS", "Çok fazla başarısız deneme. 15 dakika sonra tekrar deneyin.");
     }
   }
@@ -231,9 +315,18 @@ export class AuthService {
   private async recordFailedLogin(email: string, context: LoginContext): Promise<void> {
     const key = this.failedKey(email, context.ipAddress);
     const attempts = await redis.incr(key);
-    await redis.expire(key, 15 * 60);
+    await redis.expire(key, LOCK_SECONDS);
     if (attempts >= env.AUTH_RATE_LIMIT_MAX) {
-      await redis.set(this.banKey(email, context.ipAddress), "1", "EX", 15 * 60);
+      await redis.set(this.banKey(email, context.ipAddress), "1", "EX", LOCK_SECONDS);
+    }
+
+    // Per-account counter across all IPs, so rotating IPs does not allow
+    // unlimited guesses against one account.
+    const accountKey = this.accountFailedKey(email);
+    const accountAttempts = await redis.incr(accountKey);
+    await redis.expire(accountKey, LOCK_SECONDS);
+    if (accountAttempts >= env.AUTH_RATE_LIMIT_MAX * ACCOUNT_LOCK_MULTIPLIER) {
+      await redis.set(this.accountBanKey(email), "1", "EX", LOCK_SECONDS);
     }
 
     await auditService.write({
@@ -252,6 +345,14 @@ export class AuthService {
 
   private banKey(email: string, ipAddress: string): string {
     return `auth:ban:${ipAddress}:${email.toLowerCase()}`;
+  }
+
+  private accountFailedKey(email: string): string {
+    return `auth:failed-account:${email.toLowerCase()}`;
+  }
+
+  private accountBanKey(email: string): string {
+    return `auth:ban-account:${email.toLowerCase()}`;
   }
 
   private refreshTokenKey(jti: string): string {
@@ -280,6 +381,7 @@ interface PublicUser {
   firstName: string;
   lastName: string;
   role: Role;
+  mustChangePassword: boolean;
 }
 
 function toPublicUser(user: PublicUser): PublicUser {
@@ -288,7 +390,8 @@ function toPublicUser(user: PublicUser): PublicUser {
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
-    role: user.role
+    role: user.role,
+    mustChangePassword: user.mustChangePassword
   };
 }
 

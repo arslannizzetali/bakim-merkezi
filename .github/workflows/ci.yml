@@ -68,25 +68,28 @@ jobs:
       MINIO_SECRET_KEY: ci-secret-key-0123456789
       JWT_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       JWT_REFRESH_SECRET: abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
-      MASTER_ENCRYPTION_KEY: 1111111111111111111111111111111111111111111111111111111111111111
+      # Quoted: an all-digit value would otherwise be parsed as a YAML number.
+      MASTER_ENCRYPTION_KEY: "1111111111111111111111111111111111111111111111111111111111111111"
       # Throwaway values for the CI database only.
       SEED_ADMIN_PASSWORD: ci-admin-Password-1!
       SEED_EMPLOYEE_PASSWORD: ci-employee-Password-1!
     steps:
       - uses: actions/checkout@v4
-      # MinIO needs a `server` command, which service containers cannot pass.
+      # minio/minio is no longer published on Docker Hub, so use a pinned build.
       - name: Start MinIO
         run: |
           docker run -d --name minio -p 9000:9000 \
             -e MINIO_ROOT_USER=$MINIO_ACCESS_KEY -e MINIO_ROOT_PASSWORD=$MINIO_SECRET_KEY \
-            minio/minio server /data
-          for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
+            bitnamilegacy/minio:2025.7.23-debian-12-r5
+          for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && exit 0; sleep 2; done
+          docker logs minio; exit 1
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bakimevi/api exec prisma generate
       - name: Apply migrations
         run: pnpm --filter @bakimevi/api exec prisma migrate deploy
       - name: Check migrations match schema.prisma

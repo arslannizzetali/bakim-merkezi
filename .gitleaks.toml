@@ -1,0 +1,11 @@
+# Secret scanning config: `gitleaks git .` / `gitleaks dir .`
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Obviously fake values used only by unit tests and CI service containers"
+regexes = [
+  '''0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef''',
+  '''abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789''',
+  '''ci-secret-key-0123456789''',
+]

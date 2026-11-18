@@ -12,8 +12,8 @@ import { DemoRequestForm } from "@/components/forms/demo-request-form";
 export default function LoginPage() {
   const router = useRouter();
   const setSession = useAuthStore((state) => state.setSession);
-  const [email, setEmail] = useState("admin@bakimevi.com");
-  const [password, setPassword] = useState("ChangeMe-Admin-1!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mode, setMode] = useState<"login" | "demo">("login");
@@ -24,7 +24,7 @@ export default function LoginPage() {
     try {
       const result = await authApi.login(email, password);
       setSession(result.user, result.accessToken);
-      router.push("/dashboard");
+      router.push(result.user.mustChangePassword ? "/change-password" : "/dashboard");
     } catch (error) {
       const message =
         error instanceof ApiClientError ? error.message : "Giriş yapılamadı. Lütfen bilgileri kontrol edin.";
@@ -58,7 +58,8 @@ export default function LoginPage() {
                   onChange={(event) => setEmail(event.target.value)}
                   type="email"
                   className="focus-ring w-full rounded-xl border border-border px-4 py-3 text-text"
-                  placeholder="admin@bakimevi.com"
+                  placeholder="ornek@kurum.example"
+                  autoComplete="username"
                   required
                 />
               </label>
@@ -72,6 +73,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     className="focus-ring w-full rounded-xl border border-border px-4 py-3 pr-12 text-text"
                     placeholder="Şifreniz"
+                    autoComplete="current-password"
                     required
                   />
                   <button

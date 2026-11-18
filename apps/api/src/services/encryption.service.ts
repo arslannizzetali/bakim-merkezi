@@ -92,6 +92,11 @@ export class EncryptionService {
     return Buffer.concat([decipher.update(Buffer.from(payload.data, "hex")), decipher.final()]).toString("utf8");
   }
 
+  /** True for values written by the old zero-IV format, which must be re-encrypted. */
+  isLegacyTc(encrypted: string): boolean {
+    return !this.parseTcCipherText(encrypted).iv;
+  }
+
   packDocumentKey(encryptionKey: string, iv: string, authTag: string): string {
     return JSON.stringify({
       wrappedKey: JSON.parse(encryptionKey) as WrappedKey,

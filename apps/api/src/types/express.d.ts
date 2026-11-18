@@ -6,6 +6,7 @@ export interface RequestUser {
   firstName: string;
   lastName: string;
   role: Role;
+  mustChangePassword: boolean;
   accessTokenJti?: string;
   accessTokenExp?: number;
 }

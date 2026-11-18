@@ -12,7 +12,7 @@ export default function NewUserPage() {
     firstName: "",
     lastName: "",
     email: "",
-    password: "ChangeMe-Employee-1!",
+    password: "",
     role: "EMPLOYEE",
     isActive: true
   });
@@ -36,7 +36,10 @@ export default function NewUserPage() {
     >
       <div>
         <h2 className="text-xl font-bold text-text">Yeni Çalışan</h2>
-        <p className="text-sm text-muted">Şifre bcrypt cost 12 ile API tarafında hashlenir.</p>
+        <p className="text-sm text-muted">
+          Belirlediğiniz geçici şifre bcrypt cost 12 ile hashlenir; çalışan ilk girişte şifresini değiştirmek
+          zorundadır.
+        </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Input label="Ad" value={form.firstName} onChange={(value) => setForm({ ...form, firstName: value })} />
